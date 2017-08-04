@@ -39,7 +39,8 @@ export class MainController {
 
         function initMap(multiPartFeatures) {
             var features = [];
-            console.log(multiPartFeatures);
+            var multiPartWkt;
+
             /**
              * GOOGLE MAPS DIRECTIONS
              * 
@@ -219,15 +220,15 @@ export class MainController {
                             // //console.log(latLngString);
                         }
                         latLngString = latLngString.slice(0, -1);
-                        this.multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
-                        // //console.log(this.multiPartWkt);
+                        multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+                        // //console.log(multiPartWkt);
                         this.featureLength = multiPartFeatures.length;
                         // this.$apply();
 
                         //Set update parameters
                         this.routeFeatureWkt = lineString;
                         if (multiPartFeatures.length > 1) {
-                            this.routeFeatureWkt = this.multiPartWkt;
+                            this.routeFeatureWkt = multiPartWkt;
                         }
                         this.idPrefix = 'LN-';
                         this.shape = 'Line';
@@ -315,11 +316,11 @@ export class MainController {
                     }
                     latLngString = latLngString.slice(0, -1);
 
-                    this.multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
+                    multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
                     this.featureLength = multiPartFeatures.length;
                     // this.$apply();
                     if (multiPartFeatures.length > 1) {
-                        this.selectedWkt = this.multiPartWkt;
+                        this.selectedWkt = multiPartWkt;
                     }
 
                 } else if (this.shape === 'Line') {
@@ -330,12 +331,12 @@ export class MainController {
                         latLngString = latLngString + multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
-                    this.multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+                    multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
                     this.featureLength = multiPartFeatures.length;
                     // this.$apply();
 
                     if (multiPartFeatures.length > 1) {
-                        this.selectedWkt = this.multiPartWkt;
+                        this.selectedWkt = multiPartWkt;
                     }
                 } else if (this.shape === 'Polygon') {
                     latLngs = this.selectedWkt.slice(7);
@@ -345,14 +346,18 @@ export class MainController {
                         latLngString = latLngString + multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
-                    this.multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
+                    multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
                     this.featureLength = multiPartFeatures.length;
                     // this.$apply();
                     if (this.multiPartFeatures.length > 1) {
-                        this.selectedWkt = this.multiPartWkt;
+                        this.selectedWkt = multiPartWkt;
                     }
                 }
+                this.multiPartFeatures = multiPartFeatures;
+                this.multiPartWkt = multiPartWkt;
+
                 console.log(this.multiPartWkt);
+                console.log(this.multiPartFeatures);
 
             });
 
@@ -365,6 +370,27 @@ export class MainController {
         this.editType = editType;
         console.log(this.editType);
     }
+
+    saveFeatures() {
+        console.log(this.editType);
+        console.log(this.multiPartFeatures);
+
+        //Add to multi-part if necessary
+        if (this.editType === 'multiPoint') {
+
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
+            console.log(multiPartWkt);
+
+
+        }
+    }
+
 
     addThing() {
         if (this.newThing) {
