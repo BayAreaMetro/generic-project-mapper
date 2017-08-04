@@ -8,14 +8,27 @@ export class MainController {
     newThing = '';
 
     /*@ngInject*/
-    constructor($http, Auth) {
+    constructor($http, Auth, $scope) {
         this.$http = $http;
         this.isLoggedIn = Auth.isLoggedInSync;
         this.isAdmin = Auth.isAdminSync;
         this.getCurrentUser = Auth.getCurrentUserSync;
+        this.singlePoint = [];
+        this.multiPoint = [];
+        this.singleLine = [];
+        this.multiLine = [];
+        this.singlePoly = [];
+        this.multiPoly = [];
+        this.editType;
+        this.$scope = $scope;
+        this.multiPartFeatures = [];
+        this.selectedWkt;
+        this.multiPartWkt;
+
     }
 
     $onInit() {
+        // console.log(this.multiPartFeatures);
         this.$http.get('/api/things')
             .then(response => {
                 this.awesomeThings = response.data;
@@ -24,7 +37,20 @@ export class MainController {
 
         var gmap;
 
-        function initMap() {
+        function initMap(multiPartFeatures) {
+            var features = [];
+            console.log(multiPartFeatures);
+            /**
+             * GOOGLE MAPS DIRECTIONS
+             * 
+             */
+            var directionsService = new google.maps.DirectionsService;
+            var directionsDisplay = new google.maps.DirectionsRenderer({
+                draggable: true,
+                map: gmap
+
+            });
+
             gmap = new google.maps.Map(document.getElementById('canvas'), {
                 center: new google.maps.LatLng(37.796966, -122.275051),
                 defaults: {
@@ -139,7 +165,7 @@ export class MainController {
 
             // GOOGLE ROUTING
             //Calculate route on input change
-            this.onChange = function() {
+            var onChange = function() {
                 // //console.log('changed');
                 this.routeFeature = true;
                 calculateAndDisplayRoute(directionsService, directionsDisplay);
@@ -184,23 +210,23 @@ export class MainController {
                         lineString = lineString.slice(0, -1);
                         lineString = lineString + ')';
 
-                        this.multiPartFeatures.push(lineString.slice(11));
+                        multiPartFeatures.push(lineString.slice(11));
                         console.log('added value from click event');
-                        // //console.log(this.multiPartFeatures);
+                        // //console.log(multiPartFeatures);
                         var latLngString = '';
-                        for (i = 0; i < this.multiPartFeatures.length; i++) {
-                            latLngString = latLngString + this.multiPartFeatures[i] + ',';
+                        for (i = 0; i < multiPartFeatures.length; i++) {
+                            latLngString = latLngString + multiPartFeatures[i] + ',';
                             // //console.log(latLngString);
                         }
                         latLngString = latLngString.slice(0, -1);
                         this.multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
                         // //console.log(this.multiPartWkt);
-                        this.featureLength = this.multiPartFeatures.length;
-                        this.$apply();
+                        this.featureLength = multiPartFeatures.length;
+                        // this.$apply();
 
                         //Set update parameters
                         this.routeFeatureWkt = lineString;
-                        if (this.multiPartFeatures.length > 1) {
+                        if (multiPartFeatures.length > 1) {
                             this.routeFeatureWkt = this.multiPartWkt;
                         }
                         this.idPrefix = 'LN-';
@@ -219,21 +245,21 @@ export class MainController {
             //Google maps drawing overlay complete event
             google.maps.event.addListener(gmap.drawingManager, 'overlaycomplete', function(event) {
                 var wkt;
-                $scope.clearMap();
+                // $scope.clearMap();
 
                 // Set the drawing mode to "pan" (the hand) so users can immediately edit
                 this.setDrawingMode(null);
 
                 //Set shape type to update FMS and prefix for MapId
                 if (event.type === google.maps.drawing.OverlayType.POLYGON) {
-                    $scope.shape = 'Polygon';
-                    $scope.idPrefix = 'PY-';
+                    this.shape = 'Polygon';
+                    this.idPrefix = 'PY-';
                 } else if (event.type === google.maps.drawing.OverlayType.POLYLINE) {
-                    $scope.shape = 'Line';
-                    $scope.idPrefix = 'LN-';
+                    this.shape = 'Line';
+                    this.idPrefix = 'LN-';
                 } else if (event.type === google.maps.drawing.OverlayType.MARKER) {
-                    $scope.shape = 'Point';
-                    $scope.idPrefix = 'PT-';
+                    this.shape = 'Point';
+                    this.idPrefix = 'PT-';
 
                 }
 
@@ -261,73 +287,83 @@ export class MainController {
                 }
 
                 features.push(event.overlay);
+                console.log(features);
 
                 //Create wkt object and add currently drawn feature
                 wkt = new Wkt.Wkt();
                 wkt.fromObject(event.overlay);
 
                 //Set variable to hold original wkt feature
-                $scope.previousSelectedWkt = $scope.selectedWkt;
-                $scope.selectedWkt = wkt.toString();
+                this.previousSelectedWkt = this.selectedWkt;
+                this.selectedWkt = wkt.toString();
+                console.log(this.selectedWkt);
 
                 var latLngs;
                 var latLngString;
                 var i;
 
+                console.log(this.shape);
+
                 //Add to multi-part if necessary
-                if ($scope.shape === 'Point') {
-                    latLngs = $scope.selectedWkt.slice(6);
+                if (this.shape === 'Point') {
+                    latLngs = this.selectedWkt.slice(6);
                     latLngs = latLngs.slice(0, -1);
-                    $scope.multiPartFeatures.push(latLngs);
+                    multiPartFeatures.push(latLngs);
                     latLngString = '';
-                    for (i = 0; i < $scope.multiPartFeatures.length; i++) {
-                        latLngString = latLngString + $scope.multiPartFeatures[i] + ',';
+                    for (i = 0; i < multiPartFeatures.length; i++) {
+                        latLngString = latLngString + multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
 
-                    $scope.multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
-                    $scope.featureLength = $scope.multiPartFeatures.length;
-                    $scope.$apply();
-                    if ($scope.multiPartFeatures.length > 1) {
-                        $scope.selectedWkt = $scope.multiPartWkt;
+                    this.multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
+                    this.featureLength = multiPartFeatures.length;
+                    // this.$apply();
+                    if (multiPartFeatures.length > 1) {
+                        this.selectedWkt = this.multiPartWkt;
                     }
-                } else if ($scope.shape === 'Line') {
-                    latLngs = $scope.selectedWkt.slice(10);
-                    $scope.multiPartFeatures.push(latLngs);
-                    latLngString = '';
-                    for (i = 0; i < $scope.multiPartFeatures.length; i++) {
-                        latLngString = latLngString + $scope.multiPartFeatures[i] + ',';
-                    }
-                    latLngString = latLngString.slice(0, -1);
-                    $scope.multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
-                    $scope.featureLength = $scope.multiPartFeatures.length;
-                    $scope.$apply();
 
-                    if ($scope.multiPartFeatures.length > 1) {
-                        $scope.selectedWkt = $scope.multiPartWkt;
-                    }
-                } else if ($scope.shape === 'Polygon') {
-                    latLngs = $scope.selectedWkt.slice(7);
-                    $scope.multiPartFeatures.push(latLngs);
+                } else if (this.shape === 'Line') {
+                    latLngs = this.selectedWkt.slice(10);
+                    multiPartFeatures.push(latLngs);
                     latLngString = '';
-                    for (i = 0; i < $scope.multiPartFeatures.length; i++) {
-                        latLngString = latLngString + $scope.multiPartFeatures[i] + ',';
+                    for (i = 0; i < multiPartFeatures.length; i++) {
+                        latLngString = latLngString + multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
-                    $scope.multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
-                    $scope.featureLength = $scope.multiPartFeatures.length;
-                    $scope.$apply();
-                    if ($scope.multiPartFeatures.length > 1) {
-                        $scope.selectedWkt = $scope.multiPartWkt;
+                    this.multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+                    this.featureLength = multiPartFeatures.length;
+                    // this.$apply();
+
+                    if (multiPartFeatures.length > 1) {
+                        this.selectedWkt = this.multiPartWkt;
+                    }
+                } else if (this.shape === 'Polygon') {
+                    latLngs = this.selectedWkt.slice(7);
+                    multiPartFeatures.push(latLngs);
+                    latLngString = '';
+                    for (i = 0; i < multiPartFeatures.length; i++) {
+                        latLngString = latLngString + multiPartFeatures[i] + ',';
+                    }
+                    latLngString = latLngString.slice(0, -1);
+                    this.multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
+                    this.featureLength = multiPartFeatures.length;
+                    // this.$apply();
+                    if (this.multiPartFeatures.length > 1) {
+                        this.selectedWkt = this.multiPartWkt;
                     }
                 }
-
+                console.log(this.multiPartWkt);
 
             });
 
         }
 
-        initMap();
+        initMap(this.multiPartFeatures);
+    }
+
+    setEditType(editType) {
+        this.editType = editType;
+        console.log(this.editType);
     }
 
     addThing() {
