@@ -49,13 +49,13 @@
                     <!-- Select Basic -->
                     <div class="form-group">
                         <label class="control-label" for="selectbasic">Shape Type</label>
-                        <select id="selectbasic2" name="selectbasic" class="form-control">
-                               <option value="1">Single Point</option>
-                               <option value="1">Multiple Points</option>
-                               <option value="2">Single Line</option>
-                               <option value="2">Multiple Lines</option>
-                               <option value="2">Single Polygon</option>
-                                <option value="2">Multiple Polygons</option>
+                        <select id="selectbasic2" name="selectbasic" class="form-control" ng-model="editType" ng-change="$ctrl.setEditType(editType)">
+                               <option value="singlePoint">Single Point</option>
+                               <option value="multiPoint">Multiple Points</option>
+                               <option value="singleLine">Single Line</option>
+                               <option value="multiLine">Multiple Lines</option>
+                               <option value="singlePoly">Single Polygon</option>
+                                <option value="multiPoly">Multiple Polygons</option>
                         </select>
                     </div>
 
