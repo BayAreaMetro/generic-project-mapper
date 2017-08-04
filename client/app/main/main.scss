@@ -1,0 +1,257 @@
+.thing-form {
+    margin: 20px 0;
+}
+
+#banner {
+    border-bottom: none;
+    margin-top: -20px;
+}
+
+#banner h1 {
+    font-size: 60px;
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+.hero-unit {
+    position: relative;
+    padding: 30px 15px;
+    color: #F5F5F5;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    background: #4393B9;
+}
+
+.navbar-text {
+    margin-left: 15px;
+}
+
+
+/*Search bar*/
+
+.container-1 {
+    width: 300px;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+}
+
+.box {
+    margin: 5px auto;
+    width: 300px;
+    height: 50px;
+}
+
+.container-1 input#search {
+    width: 300px;
+    height: 50px;
+    background: $whiteColor;
+    border: none;
+    font-size: 15pt;
+    float: left;
+    color: $tertiaryColor;
+    padding-left: 45px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: solid;
+    border-width: 1px;
+    border-color: $mainColor;
+}
+
+.container-1 input#search::-webkit-input-placeholder {
+    color: $whiteColor;
+}
+
+.container-1 input#search:-moz-placeholder {
+    /* Firefox 18- */
+    color: #whiteColor;
+}
+
+.container-1 input#search::-moz-placeholder {
+    /* Firefox 19+ */
+    color: #whiteColor;
+}
+
+.container-1 input#search:-ms-input-placeholder {
+    color: #whiteColor;
+}
+
+.container-1 .icon {
+    position: absolute;
+    top: 50%;
+    margin-left: 17px;
+    margin-top: 17px;
+    z-index: 1;
+    color: green;
+}
+
+
+/* .container-1 input#search:hover,
+ .container-1 input#search:focus,
+ .container-1 input#search:active,
+  {
+     outline: none;
+     background: #ffffff;
+ }*/
+
+
+/*End Search Bar*/
+
+
+/*Map Container CSS Rules*/
+
+.mapContainer {
+    position: absolute;
+    top: 50px;
+    bottom: 0px;
+    right: 0;
+    left: 0;
+    background-color: #777;
+}
+
+.projectdetails {
+    position: absolute;
+    top: 120px;
+    right: 20px;
+    width: 500px;
+    max-height: 760px;
+    background-color: #fff;
+    z-index: 50000;
+    padding: 20px;
+    font-family: $secondaryFont;
+}
+
+.shapeStringDetails {
+    width: 500px;
+    max-height: 400px;
+    overflow: scroll;
+}
+
+.margin-top-50 {
+    margin-top: 50px;
+}
+
+.padding-top-50 {
+    margin-top: 50px;
+}
+
+.no-gutter>[class*='col-'] {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+// Side Menu
+.sideMenuPrimary {
+    width: 50px;
+    height: 50px;
+    background-color: $mainColor;
+    padding-top: 12px;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0;
+    float: right;
+    text-align: center;
+    border: solid;
+    border-width: 1px;
+    border-color: white;
+}
+
+// Select Input
+select.custom {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20x%3D%220px%22%20y%3D%220px%22%20fill%3D%22%23555555%22%20%0A%09%20width%3D%2224px%22%20height%3D%2224px%22%20viewBox%3D%22-261%20145.2%2024%2024%22%20style%3D%22enable-background%3Anew%20-261%20145.2%2024%2024%3B%22%20xml%3Aspace%3D%22preserve%22%3E%0A%3Cpath%20d%3D%22M-245.3%2C156.1l-3.6-6.5l-3.7%2C6.5%20M-252.7%2C159l3.7%2C6.5l3.6-6.5%22%2F%3E%0A%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: $whiteColor;
+    color: $tertiaryColor;
+    height: 50px;
+    width: 300px !important;
+    // float: left;
+    font-size: 15pt;
+}
+
+select.custom::-ms-expand {
+    display: none;
+}
+
+// Styles for parameter info at the top of view projects page
+.paramHeader {
+    font-family: $mainFont;
+    font-size: 15pt;
+    color: $darkColor;
+}
+
+//Google search box
+#pac-input {
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    margin-left: 12px;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 300px;
+}
+
+#pac-input:focus {
+    border-color: #4d90fe;
+}
+
+.pac-container {
+    font-family: Roboto;
+}
+
+.controls {
+    margin-top: 10px;
+    border: 1px solid transparent;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 32px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+// Google directions panel
+#floating-panel {
+    position: absolute;
+    top: 10px;
+    left: 25%;
+    z-index: 5;
+    background-color: #fff;
+    padding: 5px;
+    border: 1px solid #999;
+    text-align: center;
+    font-family: 'Roboto', 'sans-serif';
+    line-height: 30px;
+    padding-left: 10px;
+}
+
+.typeahead-demo .custom-popup-wrapper {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    background-color: #f9f9f9;
+}
+
+.typeahead-demo .custom-popup-wrapper>.message {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    color: #868686;
+}
+
+.typeahead-demo .custom-popup-wrapper>.dropdown-menu {
+    position: static;
+    float: none;
+    display: block;
+    min-width: 160px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}

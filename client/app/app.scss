@@ -1,0 +1,105 @@
+/**
+    * App-wide Styles
+    * 1) NPM imports
+    * 2) Theme Variables
+    * 3) Global Defaults
+    * 4) Overrides
+    * 5) Grunt imports
+**/
+
+
+/*1) NPM Imports*/
+
+$icon-font-path: '/assets/fonts/bootstrap/';
+@import '~bootstrap-sass/assets/stylesheets/bootstrap';
+$fa-font-path: '/assets/fonts/font-awesome/';
+@import '~font-awesome/scss/font-awesome';
+// @import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,900|Roboto:300,500,700,900);
+
+/*Custom sass styles*/
+
+@import '../assets/sass/_utility';
+@import '../assets/sass/_breakPoints';
+@import '../assets/sass/_variables';
+
+/**
+ * App-wide Styles
+ */
+
+.browserupgrade {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+
+/**
+    * 2) Theme Variables
+**/
+
+
+/* Main Theme Colors */
+
+$mainColor: #004677;
+$secondaryColor: #EC1C2E;
+$tertiaryColor: #888888;
+$mutedColor: #B3B3B3;
+$whiteColor: #ffffff;
+$darkColor: #888888;
+$successColor: #558F32;
+$messageColor: #373737;
+$close: #e51c23;
+$send: #2196f3;
+$check: #4caf50;
+$iconRed: #d9534f;
+$iconGreen: #5cb85c;
+$iconYellow: #f0ad4e;
+$iconOrange: #DB6B1E;
+$iconBg: #D2D2D2;
+$iconBorder: #8C8C8C;
+$navBlue: #296ad4;
+$nestedLink: #677184;
+$nestedHover: #EFF1F5;
+$nestedNav: rgb(114, 153, 217);
+$grayBg: #F5F5F5;
+$mainBgImage: url('../assets/images/1.png');
+// Background Colors
+.background-primary {
+    background-color: $mainColor;
+}
+
+Font Colors .font-primary {
+    color: $mainColor;
+}
+
+.font-secondary {
+    color: $secondaryColor;
+}
+
+
+/* Main Theme Fonts */
+
+$mainFont: Arial,
+"Helvetica Neue",
+Helvetica,
+sans-serif !default;
+$secondaryFont: Garamond,
+Baskerville,
+"Baskerville Old Face",
+"Hoefler Text",
+"Times New Roman",
+serif !default;
+// Component styles are injected through gulp
+
+/* inject:scss */
+
+@import 'admin/admin';
+
+@import 'main/main';
+
+@import '../components/footer/footer';
+
+@import '../components/modal/modal';
+
+/* endinject */

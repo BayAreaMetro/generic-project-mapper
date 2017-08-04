@@ -1,0 +1,143 @@
+<!-- <header class="hero-unit" id="banner">
+    <div class="container">
+        <h1>'Allo, 'Allo!</h1>
+        <p class="lead">Kick-start your next web app with Angular Fullstack</p>
+        <img src="assets/images/yeoman.png" alt="I'm Yeoman">
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Features:</h1>
+            <ul class="nav nav-tabs nav-stacked col-md-4 col-lg-4 col-sm-6" ng-repeat="thing in $ctrl.awesomeThings">
+                <li><a href="#" uib-tooltip="{{thing.info}}">{{thing.name}}</a></li>
+            </ul>
+        </div>
+    </div>
+</div> -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <form>
+                <fieldset>
+                    <!-- Form Name -->
+                    <legend>Project Attributes</legend>
+                    <!-- Select Basic -->
+                    <div class="form-group">
+                        <label class="control-label" for="selectbasic">Project Name</label>
+                        <select id="selectbasic" name="selectbasic" class="form-control">
+                              <option value="1">Option one</option>
+                              <option value="2">Option two</option>
+                        </select>
+                    </div>
+                    <label for="exampleInputEmail2">Project ID</label>
+                    <div class="form-group form-inline">
+                        <input type="email" class="form-control" id="exampleInputEmail2" placeholder="jane.doe@example.com">
+                        <button type="submit" class="btn btn-default">Generate</button>
+                    </div>
+
+
+                </fieldset>
+            </form>
+
+            <form>
+                <fieldset>
+                    <!-- Form Name -->
+                    <legend>Mapping Info</legend>
+                    <!-- Select Basic -->
+                    <div class="form-group">
+                        <label class="control-label" for="selectbasic">Shape Type</label>
+                        <select id="selectbasic2" name="selectbasic" class="form-control">
+                               <option value="1">Single Point</option>
+                               <option value="1">Multiple Points</option>
+                               <option value="2">Single Line</option>
+                               <option value="2">Multiple Lines</option>
+                               <option value="2">Single Polygon</option>
+                                <option value="2">Multiple Polygons</option>
+                        </select>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="control-label" for="textinput">ID</label>
+                        <input id="textinput2" name="textinput" placeholder="placeholder" class="form-control input-md" type="text">
+                        <span class="help-block">Add existing unique ID, or generate a new one</span>
+                    </div>
+
+                    <!-- Button (Double) -->
+                    <div class="form-group">
+                        <div style="text-align:right; padding-right:10px;">
+                            <button id="button1id2" name="button1id" class="btn btn-success">Submit</button>
+                            <button id="button2id2" name="button2id" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </form>
+        </div>
+        <div class="col-md-9" style="height:80vh;">
+            <div id="canvas" class="col-sm-12" style="position:absolute;top:0;bottom:0;right:0;height:100%; background-color:red;">
+            </div>
+        </div>
+    </div>
+    <!-- Static navbar -->
+    <!-- <nav class="navbar navbar-primary navbar-static-top">
+        <div class="container">
+            <div class="row" style="z-index:10000;">
+                <div class="col-md-12 toolbar">
+                    <div class="col-md-3" style="padding-top:5px;">
+                        <button type="button" class="btn btn-default" ng-click="viewProjects()"><span class="fa fa-arrow-left" style="padding-right:3px;"> </span> Back to Projects</button>
+                    </div>
+
+                    <div class="col-md-8">
+                        <button type="button" class="btn btn-default" ng-click="undoMapChanges()">Undo Changes</button>
+                        <button type="button" class="btn btn-default" ng-click="addNotMappable()">Not Mappable</button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-lg btn-warning" ng-click="updateShapeString()" ng-show="!routeFeature">
+                            <span class="glyphicon glyphicon-plus"></span> Update GIS Feature
+                        </button>
+                            <button type="button" class="btn btn-lg btn-warning" ng-click="updateNetworkFeature()" ng-show="routeFeature">
+                            <span class="glyphicon glyphicon-retweet"></span> Update Route Feature
+                        </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav> -->
+    <!-- <div class="projectdetails" ng-model="currentProjectDetails">
+        <h4 class="font-secondary">TIP ID:</h4>
+        <p> {{ currentProjectDetails.tipId }}</p>
+        <h4 class="font-secondary">Description:</h4>
+        <p>{{ currentProjectDetails.description }}</p>
+        <h4 class="font-secondary">Expanded Description:</h4>
+        <p>{{ currentProjectDetails.expandedDescription }}</p>
+        <h5 class="font-secondary">FMS Details: </h5>
+        <a href="http://fms.mtc.ca.gov/fms/showProjectDetailPrepare.ds?projectVersionSeq={{ currentProjectDetails.sequence }}" target="_blank">Click Here for FMS Project View</a>
+        <br>
+        <b>Start: </b>
+        <input id="start" class="controls" type="text" placeholder="  Start..." ng-model="directions.start">
+        <br>
+        <b>End: </b>
+        <input id="end" class="controls" type="text" placeholder="  End..." ng-model="directions.end">
+        <br><br>
+        <button class="btn btn-default" ng-click="onChange()">Route</button>
+        <button class="btn btn-success" ng-click="addToMultiFeatureRoute()">Add to Multi Feature</button>
+        <br><br>
+        <label>Number of Parts: {{ featureLength }}</label>
+    </div>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="floating-panel">
+    </div> -->
+
+
+</div>
