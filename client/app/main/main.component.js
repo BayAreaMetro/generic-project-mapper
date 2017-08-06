@@ -47,6 +47,7 @@ export class MainController {
             var routeFeature = false;
             var fromAddress;
             var toAddress;
+            var marker1, marker2;
 
             /**
              * GOOGLE MAPS DIRECTIONS
@@ -188,11 +189,11 @@ export class MainController {
             autocomplete1.addListener('place_changed', function() {
                 console.log(this.toAddress);
                 // infowindow.close();
-                var marker = new google.maps.Marker({
+                marker1 = new google.maps.Marker({
                     map: gmap,
                     anchorPoint: new google.maps.Point(0, -29)
                 });
-                marker.setVisible(false);
+                marker1.setVisible(false);
 
                 var place = autocomplete1.getPlace();
                 if (!place.geometry) {
@@ -209,8 +210,8 @@ export class MainController {
                     gmap.setCenter(place.geometry.location);
                     gmap.setZoom(17); // Why 17? Because it looks good.
                 }
-                marker.setPosition(place.geometry.location);
-                // marker.setVisible(true);
+                marker1.setPosition(place.geometry.location);
+                marker1.setVisible(true);
 
                 var address = '';
                 if (place.address_components) {
@@ -232,11 +233,11 @@ export class MainController {
             // To Address Autocomplete
             autocomplete2.addListener('place_changed', function() {
                 // infowindow.close();
-                var marker = new google.maps.Marker({
+                marker2 = new google.maps.Marker({
                     map: gmap,
                     anchorPoint: new google.maps.Point(0, -29)
                 });
-                marker.setVisible(false);
+                marker2.setVisible(false);
 
                 var place = autocomplete2.getPlace();
                 if (!place.geometry) {
@@ -253,8 +254,8 @@ export class MainController {
                     gmap.setCenter(place.geometry.location);
                     gmap.setZoom(17); // Why 17? Because it looks good.
                 }
-                marker.setPosition(place.geometry.location);
-                // marker.setVisible(true);
+                marker2.setPosition(place.geometry.location);
+                marker2.setVisible(true);
 
                 var address = '';
                 if (place.address_components) {
@@ -295,6 +296,9 @@ export class MainController {
              * 
              */
             function calculateAndDisplayRoute(directionsService, directionsDisplay, routeFeature, fromAddress, toAddress) {
+                marker1.setVisible(false);
+                marker2.setVisible(false);
+
                 directionsService.route({
                     origin: fromAddress,
                     destination: toAddress,
