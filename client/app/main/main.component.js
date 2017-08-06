@@ -329,6 +329,7 @@ export class MainController {
                         //Remove final , and add closing )
                         lineString = lineString.slice(0, -1);
                         lineString = lineString + ')';
+                        console.log(lineString);
 
                         multiPartFeatures.push(lineString.slice(11));
                         console.log('added value from click event');
