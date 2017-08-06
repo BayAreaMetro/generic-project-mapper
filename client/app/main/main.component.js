@@ -1,11 +1,13 @@
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
 import routing from './main.routes';
+import uuid from 'uuid';
 
 export class MainController {
 
     awesomeThings = [];
     newThing = '';
+
 
     /*@ngInject*/
     constructor($http, Auth, $scope) {
@@ -24,6 +26,8 @@ export class MainController {
         this.multiPartFeatures = [];
         this.selectedWkt;
         this.multiPartWkt;
+        this.projectId = '';
+        // this.uuid = uuid;
 
     }
 
@@ -40,6 +44,9 @@ export class MainController {
         function initMap(multiPartFeatures) {
             var features = [];
             var multiPartWkt;
+            var routeFeature = false;
+            var fromAddress;
+            var toAddress;
 
             /**
              * GOOGLE MAPS DIRECTIONS
@@ -51,6 +58,7 @@ export class MainController {
                 map: gmap
 
             });
+
 
             gmap = new google.maps.Map(document.getElementById('canvas'), {
                 center: new google.maps.LatLng(37.796966, -122.275051),
@@ -164,12 +172,119 @@ export class MainController {
 
             //END GOOGLE SEARCH
 
+
+            // GOOGLE AUTOCOMPLETE
+            // Autocomplete directions
+            var fromAddress = document.getElementById('fromAddress');
+            var toAddress = document.getElementById('toAddress');
+
+            var autocomplete1 = new google.maps.places.Autocomplete(fromAddress);
+            var autocomplete2 = new google.maps.places.Autocomplete(toAddress);
+
+            autocomplete1.bindTo('bounds', gmap);
+            autocomplete2.bindTo('bounds', gmap);
+
+            //From Address Autocomplete
+            autocomplete1.addListener('place_changed', function() {
+                console.log(this.toAddress);
+                // infowindow.close();
+                var marker = new google.maps.Marker({
+                    map: gmap,
+                    anchorPoint: new google.maps.Point(0, -29)
+                });
+                marker.setVisible(false);
+
+                var place = autocomplete1.getPlace();
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    window.alert("No details available for input: '" + place.name + "'");
+                    return;
+                }
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    gmap.fitBounds(place.geometry.viewport);
+                } else {
+                    gmap.setCenter(place.geometry.location);
+                    gmap.setZoom(17); // Why 17? Because it looks good.
+                }
+                marker.setPosition(place.geometry.location);
+                // marker.setVisible(true);
+
+                var address = '';
+                if (place.address_components) {
+                    address = [
+                        (place.address_components[0] && place.address_components[0].short_name || ''),
+                        (place.address_components[1] && place.address_components[1].short_name || ''),
+                        (place.address_components[2] && place.address_components[2].short_name || '')
+                    ].join(' ');
+                }
+
+                // infowindowContent.children['place-icon'].src = place.icon;
+                // infowindowContent.children['place-name'].textContent = place.name;
+                // infowindowContent.children['place-address'].textContent = address;
+                console.log(address);
+                fromAddress = address;
+                // infowindow.open(map, marker);
+            });
+
+            // To Address Autocomplete
+            autocomplete2.addListener('place_changed', function() {
+                // infowindow.close();
+                var marker = new google.maps.Marker({
+                    map: gmap,
+                    anchorPoint: new google.maps.Point(0, -29)
+                });
+                marker.setVisible(false);
+
+                var place = autocomplete2.getPlace();
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    window.alert("No details available for input: '" + place.name + "'");
+                    return;
+                }
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    gmap.fitBounds(place.geometry.viewport);
+                } else {
+                    gmap.setCenter(place.geometry.location);
+                    gmap.setZoom(17); // Why 17? Because it looks good.
+                }
+                marker.setPosition(place.geometry.location);
+                // marker.setVisible(true);
+
+                var address = '';
+                if (place.address_components) {
+                    address = [
+                        (place.address_components[0] && place.address_components[0].short_name || ''),
+                        (place.address_components[1] && place.address_components[1].short_name || ''),
+                        (place.address_components[2] && place.address_components[2].short_name || '')
+                    ].join(' ');
+                }
+
+                // infowindowContent.children['place-icon'].src = place.icon;
+                // infowindowContent.children['place-name'].textContent = place.name;
+                // infowindowContent.children['place-address'].textContent = address;
+                console.log(address);
+                toAddress = address;
+
+                onChange();
+                // infowindow.open(map, marker);
+            });
+
+            function setToAddress(address) {
+                console.log(address);
+            }
+
             // GOOGLE ROUTING
             //Calculate route on input change
             var onChange = function() {
                 // //console.log('changed');
-                this.routeFeature = true;
-                calculateAndDisplayRoute(directionsService, directionsDisplay);
+                routeFeature = true;
+                calculateAndDisplayRoute(directionsService, directionsDisplay, routeFeature, fromAddress, toAddress);
             };
 
             /**
@@ -179,10 +294,10 @@ export class MainController {
              * @param  {[type]} directions [start and end values]
              * 
              */
-            function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+            function calculateAndDisplayRoute(directionsService, directionsDisplay, routeFeature, fromAddress, toAddress) {
                 directionsService.route({
-                    origin: this.directions.start,
-                    destination: this.directions.end,
+                    origin: fromAddress,
+                    destination: toAddress,
                     travelMode: google.maps.TravelMode.DRIVING
                 }, function(response, status) {
                     if (status === google.maps.DirectionsStatus.OK) {
@@ -372,8 +487,8 @@ export class MainController {
     }
 
     saveFeatures() {
-        console.log(this.editType);
-        console.log(this.multiPartFeatures);
+        // console.log(document.getElementById('toAddress').value);
+        // console.log(document.getElementById('toAddress').value);
 
         //Add to multi-part if necessary
         if (this.editType === 'multiPoint') {
@@ -385,12 +500,73 @@ export class MainController {
             latLngString = latLngString.slice(0, -1);
 
             var multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
-            console.log(multiPartWkt);
+            // console.log(multiPartWkt);
 
+
+        } else if (this.editType === 'multiLine') {
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+            // console.log(multiPartWkt);
+
+        } else if (this.editType === 'multiPolygon') {
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
+            // console.log(multiPartWkt);
+
+        } else if (this.editType === 'singlePoint') {
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'POINT (' + latLngString + ')';
+            // console.log(multiPartWkt);
+
+        } else if (this.editType === 'singleLine') {
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'LINESTRING (' + latLngString + ')';
+            // console.log(multiPartWkt);
+
+        } else if (this.editType === 'singlePolygon') {
+            var latLngString = '';
+            for (var i = 0; i < this.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            }
+            latLngString = latLngString.slice(0, -1);
+
+            var multiPartWkt = 'POLYGON (' + latLngString + ')';
+            // console.log(multiPartWkt);
 
         }
+
+        var mapInfo = {
+            Id: this.projectId,
+            Wkt: multiPartWkt
+        }
+        console.log(mapInfo);
     }
 
+    generateID() {
+        console.log(uuid.v1());
+        console.log('clicked');
+        this.projectId = uuid.v1();
+    }
 
     addThing() {
         if (this.newThing) {
