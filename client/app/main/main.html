@@ -27,14 +27,14 @@
                     <!-- Select Basic -->
                     <div class="form-group">
                         <label class="control-label" for="selectbasic">Project Name</label>
-                        <select id="selectbasic" name="selectbasic" class="form-control">
-                              <option value="1">Option one</option>
-                              <option value="2">Option two</option>
+                        <select id="selectbasic" name="selectbasic" class="form-control" ng-model="$ctrl.project.name">
+                              <option value="TIP">TIP</option>
+                              <option value="Obag">Obag</option>
                         </select>
                     </div>
                     <label for="exampleInputEmail2">Project ID</label>
                     <div class="form-group form-inline">
-                        <input type="text" class="form-control" id="exampleInputEmail2" ng-model="$ctrl.projectId">
+                        <input type="text" class="form-control" id="exampleInputEmail2" ng-model="$ctrl.project.Id" style="width:70%;">
                         <button type="submit" class="btn btn-default" ng-click="$ctrl.generateID()">Generate</button>
                     </div>
                     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
@@ -58,30 +58,48 @@
                                 <option value="multiPoly">Multiple Polygons</option>
                         </select>
                     </div>
-
-                    <!-- Text input-->
-                    <div class="form-group">
-                        <label class="control-label" for="textinput">From</label>
-                        <input id="fromAddress" name="textinput" class="form-control input-md" type="text" ng-model="fromAddress">
-                        <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
-                    </div>
-                    <!-- Text input-->
-                    <div class="form-group">
-                        <label class="control-label" for="textinput">To</label>
-                        <input id="toAddress" name="textinput" class="form-control input-md" type="text" ng-model="toAddress">
-                        <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
-                    </div>
-
-                    <!-- Button (Double) -->
-                    <div class="form-group">
-                        <div style="text-align:right; padding-right:10px;">
-                            <button id="button1id2" name="button1id" class="btn btn-success" ng-click="$ctrl.saveFeatures()">Submit</button>
-                            <button id="button2id2" name="button2id" class="btn btn-danger" ng-click="$ctrl.clearMap()">Cancel</button>
-                        </div>
-                    </div>
-
                 </fieldset>
             </form>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Routing Info
+                </div>
+                <div class="panel-body">
+                    <form>
+                        <fieldset>
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="control-label" for="textinput">From</label>
+                                <input id="fromAddress" name="textinput" class="form-control input-md" type="text" ng-model="$ctrl.fromAddress">
+                                <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
+                            </div>
+                            <!-- Text input-->
+                            <div class="form-group">
+                                <label class="control-label" for="textinput">To</label>
+                                <input id="toAddress" name="textinput" class="form-control input-md" type="text" ng-model="$ctrl.toAddress">
+                                <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
+                            </div>
+                            <!-- Button (Double) -->
+                            <div class="form-group">
+                                <div style="text-align:right; padding-right:10px;">
+                                    <button id="removeLastFeature" name="button1id" class="btn btn-success" ng-click="$ctrl.removeLastFeature()">Remove Last</button>
+                                    <button id="saveFeature" name="button2id" class="btn btn-danger" ng-click="$ctrl.saveAddNextNetworkRoute()">Save/Add Next</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+
+
+            <!-- Button (Double) -->
+            <div class="form-group">
+                <div style="text-align:right; padding-right:10px;">
+                    <button id="button1id2" name="button1id" class="btn btn-success" ng-click="$ctrl.saveFeatures()">Submit</button>
+                    <button id="button2id2" name="button2id" class="btn btn-danger" ng-click="$ctrl.resetMap()">Cancel</button>
+                </div>
+            </div>
+
         </div>
         <div class="col-md-9" style="height:80vh;">
             <div id="canvas" class="col-sm-12" style="position:absolute;top:0;bottom:0;right:0;height:100%; background-color:red;">

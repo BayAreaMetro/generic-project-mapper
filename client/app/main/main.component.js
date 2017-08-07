@@ -27,6 +27,7 @@ export class MainController {
         this.selectedWkt;
         this.multiPartWkt;
         this.projectId = '';
+        this.project = {};
         // this.uuid = uuid;
 
     }
@@ -40,14 +41,17 @@ export class MainController {
             });
 
         var gmap;
+        // gmap.multiPartFeatures = [];
 
-        function initMap(multiPartFeatures) {
-            var features = [];
+        this.initMap = function() {
+
+
             var multiPartWkt;
             var routeFeature = false;
             var fromAddress;
             var toAddress;
             var marker1, marker2;
+
 
             /**
              * GOOGLE MAPS DIRECTIONS
@@ -61,13 +65,88 @@ export class MainController {
             });
 
 
+            //Directions changed event. Triggers when route is dragged/edited
+            directionsDisplay.addListener('directions_changed', function() {
+                // computeEditedRoute(directionsDisplay.getDirections());
+                console.log(gmap.editedRoute);
+                computeEditedRoute(directionsDisplay.getDirections(), gmap.editedRoute);
+
+            });
+
+            //Takes the generated route, adds it to multi-part array and calculates the wkt string
+            function computeEditedRoute(result, editedRoute) {
+
+
+                if (editedRoute) {
+                    console.log(result);
+                    console.log('re-calculated');
+                    var i = 0;
+                    var j = 0;
+                    //console.log(response);
+                    var pointsArray = result.routes[0].overview_path;
+                    var finalArray = [];
+
+                    //Create an array of Lat/Lngs from response overview_path
+                    for (j = 0; j < pointsArray.length; j++) {
+                        finalArray[i] = pointsArray[j].lng() + ' ' + pointsArray[j].lat();
+                        i++;
+
+                    }
+
+                    //Build WKT string from lat/lngs
+                    var lineString = '';
+                    for (var t = 0; t < finalArray.length; t++) {
+                        lineString += finalArray[t] + ',';
+                    }
+
+                    //Remove final , and add closing )
+                    lineString = lineString.slice(0, -1);
+                    gmap.networkString = lineString;
+                    // lineString = lineString + ')';
+
+                    //Remove last value from array and re-add the edited value
+                    // console.log(gmap.multiPartFeatures.length);
+                    // gmap.multiPartFeatures.pop();
+                    // console.log(gmap.multiPartFeatures.length);
+                    // gmap.multiPartFeatures.push(lineString.slice(11));
+                    // gmap.networkString = 
+                    // console.log(gmap.multiPartFeatures.length);
+                    console.log('added value from edit route event');
+
+                    var decodedPath = google.maps.geometry.encoding.decodePath(result.routes[0].overview_polyline);
+                    // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                    // var newNetworkLine;
+                    gmap.newNetworkLine.setMap(null);
+                    gmap.newNetworkLine = null;
+                    gmap.newNetworkLine = new google.maps.Polyline({
+                        path: decodedPath,
+                        // levels: decodedLevels,
+                        strokeColor: '#2196f3',
+                        fillColor: '#2196f3',
+                        fillOpacity: 0.6,
+                        strokeWeight: 14,
+                        map: gmap
+                    });
+
+
+                    //Set update parameters
+                    // $scope.routeFeatureWkt = lineString;
+                    // if ($scope.multiPartFeatures.length > 1) {
+                    //     $scope.routeFeatureWkt = $scope.multiPartWkt;
+                    // }
+                    // $scope.idPrefix = 'LN-';
+                    // $scope.shape = 'Line';
+                }
+            }
+
+
             gmap = new google.maps.Map(document.getElementById('canvas'), {
                 center: new google.maps.LatLng(37.796966, -122.275051),
                 defaults: {
                     //icon: '/assets/images/GenericBlueStop16.png',
                     //shadow: 'dot_shadow.png',                    
                     editable: false,
-                    strokeColor: '#2196f3',
+                    strokeColor: 'red',
                     fillColor: '#2196f3',
                     fillOpacity: 0.6,
                     strokeWeight: 14
@@ -90,6 +169,7 @@ export class MainController {
                 }
             });
 
+            gmap.editedRoute = false;
 
             //Google maps drawing configuration
             gmap.drawingManager = new google.maps.drawing.DrawingManager({
@@ -112,19 +192,23 @@ export class MainController {
             // Set map for directions display
             directionsDisplay.setMap(gmap);
 
+
             //GOOGLE SEARCH
-            var wrappedQueryResult = document.getElementById('pac-input');
+            var googleSearchInputBox = document.getElementById('pac-input');
 
             // Create the search box and link it to the UI element.
-            var searchBox = new google.maps.places.SearchBox(wrappedQueryResult);
-            gmap.controls[google.maps.ControlPosition.TOP_LEFT].push(wrappedQueryResult);
+            var searchBox = new google.maps.places.SearchBox(googleSearchInputBox);
+            gmap.controls[google.maps.ControlPosition.TOP_LEFT].push(googleSearchInputBox);
 
             // Bias the SearchBox results towards current map's viewport.
             gmap.addListener('bounds_changed', function() {
                 searchBox.setBounds(gmap.getBounds());
             });
 
+
+
             var markers = [];
+            gmap.features = [];
             // Listen for the event fired when the user selects a prediction and retrieve
             // more details for that place.
             searchBox.addListener('places_changed', function() {
@@ -226,7 +310,9 @@ export class MainController {
                 // infowindowContent.children['place-name'].textContent = place.name;
                 // infowindowContent.children['place-address'].textContent = address;
                 console.log(address);
-                fromAddress = address;
+                gmap.fromAddress = address;
+                gmap.toAddress = '';
+                toAddress.value = '';
                 // infowindow.open(map, marker);
             });
 
@@ -270,22 +356,20 @@ export class MainController {
                 // infowindowContent.children['place-name'].textContent = place.name;
                 // infowindowContent.children['place-address'].textContent = address;
                 console.log(address);
-                toAddress = address;
+                gmap.toAddress = address;
 
-                onChange();
+                gmap.onChange();
                 // infowindow.open(map, marker);
             });
 
-            function setToAddress(address) {
-                console.log(address);
-            }
+
 
             // GOOGLE ROUTING
             //Calculate route on input change
-            var onChange = function() {
+            gmap.onChange = function() {
                 // //console.log('changed');
-                routeFeature = true;
-                calculateAndDisplayRoute(directionsService, directionsDisplay, routeFeature, fromAddress, toAddress);
+                gmap.routeFeature = true;
+                gmap.calculateAndDisplayRoute(directionsService, directionsDisplay);
             };
 
             /**
@@ -295,18 +379,18 @@ export class MainController {
              * @param  {[type]} directions [start and end values]
              * 
              */
-            function calculateAndDisplayRoute(directionsService, directionsDisplay, routeFeature, fromAddress, toAddress) {
+            gmap.calculateAndDisplayRoute = function(directionsService, directionsDisplay) {
                 marker1.setVisible(false);
                 marker2.setVisible(false);
 
                 directionsService.route({
-                    origin: fromAddress,
-                    destination: toAddress,
+                    origin: gmap.fromAddress,
+                    destination: gmap.toAddress,
                     travelMode: google.maps.TravelMode.DRIVING
                 }, function(response, status) {
                     if (status === google.maps.DirectionsStatus.OK) {
                         directionsDisplay.setDirections(response);
-
+                        // console.log(response);
                         var i = 0;
                         var j = 0;
                         //console.log(response);
@@ -320,40 +404,63 @@ export class MainController {
 
                         }
 
+                        console.log('changed');
+
+
+                        var decodedPath = google.maps.geometry.encoding.decodePath(response.routes[0].overview_polyline);
+                        // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                        // var newNetworkLine;
+                        gmap.newNetworkLine = new google.maps.Polyline({
+                            path: decodedPath,
+                            // levels: decodedLevels,
+                            strokeColor: '#2196f3',
+                            fillColor: '#2196f3',
+                            fillOpacity: 0.6,
+                            strokeWeight: 14,
+                            map: gmap
+                        });
+
+
+
+
                         //Build WKT string from lat/lngs
-                        var lineString = 'LINESTRING (';
+                        var networkString = 'LINESTRING (';
+                        var networkString = '';
                         for (var t = 0; t < finalArray.length; t++) {
-                            lineString += finalArray[t] + ',';
+                            networkString += finalArray[t] + ',';
                         }
 
                         //Remove final , and add closing )
-                        lineString = lineString.slice(0, -1);
-                        lineString = lineString + ')';
-                        console.log(lineString);
+                        networkString = networkString.slice(0, -1);
+                        // lineString = lineString + ')';
+                        console.log(networkString);
+                        gmap.networkString = networkString;
 
-                        multiPartFeatures.push(lineString.slice(11));
-                        console.log('added value from click event');
+                        // gmap.multiPartFeatures.push(lineString);
+                        // console.log(gmap.multiPartFeatures);
+                        // console.log('added value from click event');
                         // //console.log(multiPartFeatures);
                         var latLngString = '';
-                        for (i = 0; i < multiPartFeatures.length; i++) {
-                            latLngString = latLngString + multiPartFeatures[i] + ',';
+                        for (i = 0; i < gmap.multiPartFeatures.length; i++) {
+                            latLngString = latLngString + gmap.multiPartFeatures[i] + ',';
                             // //console.log(latLngString);
                         }
                         latLngString = latLngString.slice(0, -1);
                         multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
-                        // //console.log(multiPartWkt);
-                        this.featureLength = multiPartFeatures.length;
+                        console.log('the wkt');
+                        console.log(multiPartWkt);
+                        gmap.featureLength = gmap.multiPartFeatures.length;
                         // this.$apply();
 
                         //Set update parameters
-                        this.routeFeatureWkt = lineString;
-                        if (multiPartFeatures.length > 1) {
+                        this.routeFeatureWkt = networkString;
+                        if (gmap.multiPartFeatures.length > 1) {
                             this.routeFeatureWkt = multiPartWkt;
                         }
                         this.idPrefix = 'LN-';
                         this.shape = 'Line';
 
-                        this.editedRoute = true;
+                        gmap.editedRoute = true;
 
                     } else {
                         window.alert('Directions request failed due to ' + status);
@@ -364,6 +471,7 @@ export class MainController {
             //END GOOGLE ROUTING
 
             //Google maps drawing overlay complete event
+            gmap.multiPartFeatures = [];
             google.maps.event.addListener(gmap.drawingManager, 'overlaycomplete', function(event) {
                 var wkt;
                 // $scope.clearMap();
@@ -407,8 +515,9 @@ export class MainController {
                     });
                 }
 
-                features.push(event.overlay);
-                console.log(features);
+                gmap.features.push(event.overlay);
+                console.log('overlay', event.overlay);
+                console.log(gmap.features);
 
                 //Create wkt object and add currently drawn feature
                 wkt = new Wkt.Wkt();
@@ -429,78 +538,89 @@ export class MainController {
                 if (this.shape === 'Point') {
                     latLngs = this.selectedWkt.slice(6);
                     latLngs = latLngs.slice(0, -1);
-                    multiPartFeatures.push(latLngs);
+                    gmap.multiPartFeatures.push(latLngs);
                     latLngString = '';
-                    for (i = 0; i < multiPartFeatures.length; i++) {
-                        latLngString = latLngString + multiPartFeatures[i] + ',';
+                    for (i = 0; i < gmap.multiPartFeatures.length; i++) {
+                        latLngString = latLngString + gmap.multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
 
                     multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
-                    this.featureLength = multiPartFeatures.length;
+                    this.featureLength = gmap.multiPartFeatures.length;
                     // this.$apply();
-                    if (multiPartFeatures.length > 1) {
+                    if (gmap.multiPartFeatures.length > 1) {
                         this.selectedWkt = multiPartWkt;
                     }
 
                 } else if (this.shape === 'Line') {
                     latLngs = this.selectedWkt.slice(10);
-                    multiPartFeatures.push(latLngs);
+                    gmap.multiPartFeatures.push(latLngs);
                     latLngString = '';
-                    for (i = 0; i < multiPartFeatures.length; i++) {
-                        latLngString = latLngString + multiPartFeatures[i] + ',';
+                    for (i = 0; i < gmap.multiPartFeatures.length; i++) {
+                        latLngString = latLngString + gmap.multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
                     multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
-                    this.featureLength = multiPartFeatures.length;
+                    this.featureLength = gmap.multiPartFeatures.length;
                     // this.$apply();
 
-                    if (multiPartFeatures.length > 1) {
+                    if (gmap.multiPartFeatures.length > 1) {
                         this.selectedWkt = multiPartWkt;
                     }
                 } else if (this.shape === 'Polygon') {
                     latLngs = this.selectedWkt.slice(7);
-                    multiPartFeatures.push(latLngs);
+                    gmap.multiPartFeatures.push(latLngs);
                     latLngString = '';
-                    for (i = 0; i < multiPartFeatures.length; i++) {
-                        latLngString = latLngString + multiPartFeatures[i] + ',';
+                    for (i = 0; i < gmap.multiPartFeatures.length; i++) {
+                        latLngString = latLngString + gmap.multiPartFeatures[i] + ',';
                     }
                     latLngString = latLngString.slice(0, -1);
                     multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
-                    this.featureLength = multiPartFeatures.length;
+                    this.featureLength = gmap.multiPartFeatures.length;
                     // this.$apply();
-                    if (this.multiPartFeatures.length > 1) {
+                    if (gmap.multiPartFeatures.length > 1) {
                         this.selectedWkt = multiPartWkt;
                     }
                 }
-                this.multiPartFeatures = multiPartFeatures;
-                this.multiPartWkt = multiPartWkt;
 
-                console.log(this.multiPartWkt);
-                console.log(this.multiPartFeatures);
+                gmap.multiPartWkt = multiPartWkt;
+
+                console.log(gmap.multiPartWkt);
+                console.log(gmap.multiPartFeatures);
 
             });
 
+            gmap.testFunction = function() {
+                console.log('testing gmap function');
+            }
+
+            gmap.directionsDisplay = directionsDisplay;
+            gmap.directionsService = directionsService;
+
+            return gmap;
+
         }
 
-        initMap(this.multiPartFeatures);
+        this.gmap = this.initMap();
     }
 
     setEditType(editType) {
         this.editType = editType;
         console.log(this.editType);
+        this.gmap.editType = editType;
+        // console.log(this.gmap);
     }
 
     saveFeatures() {
         // console.log(document.getElementById('toAddress').value);
         // console.log(document.getElementById('toAddress').value);
-
+        console.log(this.gmap);
         //Add to multi-part if necessary
         if (this.editType === 'multiPoint') {
 
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
@@ -510,18 +630,19 @@ export class MainController {
 
         } else if (this.editType === 'multiLine') {
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + '(' + this.gmap.multiPartFeatures[i] + '),';
             }
             latLngString = latLngString.slice(0, -1);
 
             var multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+            this.mapIt(multiPartWkt);
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'multiPolygon') {
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
@@ -530,8 +651,8 @@ export class MainController {
 
         } else if (this.editType === 'singlePoint') {
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
@@ -540,8 +661,8 @@ export class MainController {
 
         } else if (this.editType === 'singleLine') {
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
@@ -550,8 +671,8 @@ export class MainController {
 
         } else if (this.editType === 'singlePolygon') {
             var latLngString = '';
-            for (var i = 0; i < this.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.multiPartFeatures[i] + ',';
+            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
@@ -561,8 +682,9 @@ export class MainController {
         }
 
         var mapInfo = {
-            Id: this.projectId,
-            Wkt: multiPartWkt
+            name: this.project.name,
+            Id: this.project.Id,
+            wkt: multiPartWkt
         }
         console.log(mapInfo);
     }
@@ -570,7 +692,18 @@ export class MainController {
     generateID() {
         console.log(uuid.v1());
         console.log('clicked');
-        this.projectId = uuid.v1();
+        this.project.Id = uuid.v1();
+
+    }
+
+    resetMap() {
+        for (var i in this.gmap.features) {
+            if (this.gmap.features.hasOwnProperty(i)) {
+                this.gmap.features[i].setMap(null);
+            }
+        }
+        this.gmap.features.length = 0;
+        this.gmap.multiPartFeatures = [];
     }
 
     addThing() {
@@ -584,6 +717,101 @@ export class MainController {
 
     deleteThing(thing) {
         this.$http.delete(`/api/things/${thing._id}`);
+    }
+
+    saveAddNextNetworkRoute() {
+        console.log(this.gmap);
+        this.gmap.features.push(this.gmap.newNetworkLine);
+        console.log(this.gmap.features);
+
+
+        this.gmap.multiPartFeatures.push(this.gmap.networkString);
+        this.gmap.networkString = '';
+        console.log(this.gmap.multiPartFeatures.length);
+        this.toAddress = null;
+        this.fromAddress = null;
+        this.gmap.toAddress = null;
+        this.gmap.fromAddress = null;
+
+    }
+
+    mapIt(wktValue) {
+        /**
+         * Maps the current contents of the textarea.
+         * @return  {Object}    Some sort of geometry object
+         */
+
+        var el, obj, wkt, i;
+
+        // el = document.getElementById('wkt');
+        wkt = new Wkt.Wkt();
+
+
+
+        try { // Catch any malformed WKT strings
+            wkt.read(wktValue);
+        } catch (e1) {
+            try {
+                wkt.read(wktValue.replace('\n', '').replace('\r', '').replace('\t', ''));
+            } catch (e2) {
+                if (e2.name === 'WKTError') {
+                    alert('Wicket could not understand the WKT string you entered. Check that you have parentheses balanced, and try removing tabs and newline characters.');
+                    return;
+                }
+            }
+        }
+
+        obj = wkt.toObject(this.gmap.defaults); // Make an object
+
+        // Add listeners for overlay editing events
+        if (!Wkt.isArray(obj) && wkt.type !== 'point') {
+            // New vertex is inserted
+            google.maps.event.addListener(obj.getPath(), 'insert_at', function(n) {
+                app.updateText();
+            });
+            // Existing vertex is removed (insertion is undone)
+            google.maps.event.addListener(obj.getPath(), 'remove_at', function(n) {
+                app.updateText();
+            });
+            // Existing vertex is moved (set elsewhere)
+            google.maps.event.addListener(obj.getPath(), 'set_at', function(n) {
+                app.updateText();
+            });
+        } else {
+            if (obj.setEditable) { obj.setEditable(false); }
+        }
+
+        var bounds = new google.maps.LatLngBounds();
+
+        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
+            for (i in obj) {
+                if (obj.hasOwnProperty(i) && !Wkt.isArray(obj[i])) {
+                    obj[i].setMap(this.gmap);
+                    this.gmap.features.push(obj[i]);
+
+                    if (wkt.type === 'point' || wkt.type === 'multipoint')
+                        bounds.extend(obj[i].getPosition());
+                    else
+                        obj[i].getPath().forEach(function(element, index) { bounds.extend(element) });
+                }
+            }
+
+            this.gmap.features = this.gmap.features.concat(obj);
+        } else {
+            obj.setMap(this.gmap); // Add it to the map
+            this.gmap.features.push(obj);
+
+            if (wkt.type === 'point' || wkt.type === 'multipoint')
+                bounds.extend(obj.getPosition());
+            else
+                obj.getPath().forEach(function(element, index) { bounds.extend(element) });
+        }
+
+        // Pan the map to the feature
+        this.gmap.fitBounds(bounds);
+
+        return obj;
+
     }
 }
 
