@@ -52,11 +52,47 @@ export class MainController {
             var toAddress;
             var marker1, marker2;
 
+            gmap = new google.maps.Map(document.getElementById('canvas'), {
+                center: new google.maps.LatLng(37.796966, -122.275051),
+                defaults: {
+                    //icon: '/assets/images/GenericBlueStop16.png',
+                    //shadow: 'dot_shadow.png',                    
+                    editable: false,
+                    strokeColor: 'red',
+                    fillColor: '#2196f3',
+                    fillOpacity: 0.6,
+                    strokeWeight: 14
+
+                },
+                disableDefaultUI: true,
+                mapTypeControl: true,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                mapTypeControlOptions: {
+                    position: google.maps.ControlPosition.TOP_LEFT,
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                },
+                panControl: true,
+                streetViewControl: true,
+                zoom: 10,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_TOP,
+                    style: google.maps.ZoomControlStyle.SMALL
+                }
+            });
+
 
             /**
              * GOOGLE MAPS DIRECTIONS
              * 
              */
+            gmap.routing = {};
+            gmap.routing.directionsService = new google.maps.DirectionsService;
+            gmap.routing.directionsDisplay = new google.maps.DirectionsRenderer({
+                draggable: true,
+                map: gmap
+
+            });
             var directionsService = new google.maps.DirectionsService;
             var directionsDisplay = new google.maps.DirectionsRenderer({
                 draggable: true,
@@ -66,10 +102,10 @@ export class MainController {
 
 
             //Directions changed event. Triggers when route is dragged/edited
-            directionsDisplay.addListener('directions_changed', function() {
+            gmap.routing.directionsDisplay.addListener('directions_changed', function() {
                 // computeEditedRoute(directionsDisplay.getDirections());
                 console.log(gmap.editedRoute);
-                computeEditedRoute(directionsDisplay.getDirections(), gmap.editedRoute);
+                computeEditedRoute(gmap.routing.directionsDisplay.getDirections(), gmap.editedRoute);
 
             });
 
@@ -140,34 +176,7 @@ export class MainController {
             }
 
 
-            gmap = new google.maps.Map(document.getElementById('canvas'), {
-                center: new google.maps.LatLng(37.796966, -122.275051),
-                defaults: {
-                    //icon: '/assets/images/GenericBlueStop16.png',
-                    //shadow: 'dot_shadow.png',                    
-                    editable: false,
-                    strokeColor: 'red',
-                    fillColor: '#2196f3',
-                    fillOpacity: 0.6,
-                    strokeWeight: 14
 
-                },
-                disableDefaultUI: true,
-                mapTypeControl: true,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                mapTypeControlOptions: {
-                    position: google.maps.ControlPosition.TOP_LEFT,
-                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                },
-                panControl: true,
-                streetViewControl: true,
-                zoom: 10,
-                zoomControl: true,
-                zoomControlOptions: {
-                    position: google.maps.ControlPosition.LEFT_TOP,
-                    style: google.maps.ZoomControlStyle.SMALL
-                }
-            });
 
             gmap.editedRoute = false;
 
@@ -369,7 +378,7 @@ export class MainController {
             gmap.onChange = function() {
                 // //console.log('changed');
                 gmap.routeFeature = true;
-                gmap.calculateAndDisplayRoute(directionsService, directionsDisplay);
+                gmap.calculateAndDisplayRoute(gmap.routing.directionsService, gmap.routing.directionsDisplay);
             };
 
             /**
@@ -466,6 +475,9 @@ export class MainController {
                         window.alert('Directions request failed due to ' + status);
                     }
                 });
+
+                directionsDisplay = gmap.routing.directionsDisplay;
+                directionsService = gmap.routing.directionsService;
             }
 
             //END GOOGLE ROUTING
@@ -723,6 +735,13 @@ export class MainController {
         console.log(this.gmap);
         this.gmap.features.push(this.gmap.newNetworkLine);
         console.log(this.gmap.features);
+        // console.log(this.gmap.directionsDisplay);
+        this.gmap.routing.directionsDisplay.setMap(null);
+        this.gmap.routing.directionsDisplay = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: this.gmap
+
+        });
 
 
         this.gmap.multiPartFeatures.push(this.gmap.networkString);
