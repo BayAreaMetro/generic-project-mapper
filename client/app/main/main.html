@@ -83,7 +83,7 @@
                             <div class="form-group">
                                 <div style="text-align:right; padding-right:10px;">
                                     <button id="removeLastFeature" name="button1id" class="btn btn-success" ng-click="$ctrl.removeLastFeature()">Remove Last</button>
-                                    <button id="saveFeature" name="button2id" class="btn btn-danger" ng-click="$ctrl.saveAddNextNetworkRoute()">Save/Add Next</button>
+                                    <button id="saveFeature" name="button2id" class="btn btn-danger" ng-click="$ctrl.saveAddNextNetworkRoute()" ng-show="$ctrl.featureExists">Save/Add Next</button>
                                 </div>
                             </div>
                         </fieldset>

@@ -699,6 +699,14 @@ export class MainController {
             wkt: multiPartWkt
         }
         console.log(mapInfo);
+        this.$http.post('/api/projects/map', mapInfo)
+            .then(results => {
+                console.log(results);
+                this.initMap();
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     generateID() {

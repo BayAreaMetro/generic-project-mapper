@@ -114,6 +114,7 @@ export function create(req, res) {
 
 export function addMap(req, res) {
     var data = req.body;
+    // console.log(req.body);
     // sql.execute({
     //     query: "SELECT * FROM [vgiryavets].[InitialDataSurvey]"
     // }).then(function(results) {
@@ -124,21 +125,38 @@ export function addMap(req, res) {
     //     res.json(err);
     // });
 
-    var updateMember = function(Id, wkt) {
+
+    var updateMember = function(Id, wkt, project) {
         return sql.execute({
-            procedure: "updateMember",
+            procedure: "[rpd].[InsertMappingDataApplication]",
             params: {
                 Id: {
                     type: sql.NVARCHAR(60),
-                    val: memberId
+                    val: Id
                 },
                 WKT: {
-                    type: sql.NVARCHAR(MAX),
+                    type: sql.NVARCHAR(),
                     val: wkt
+                },
+                Project: {
+                    type: sql.NVARCHAR(),
+                    val: project
                 }
             }
         });
     };
+
+    console.log(data.Id, ": Id");
+    console.log(data.wkt);
+    updateMember(data.Id, data.wkt, data.name)
+        .then(results => {
+            console.log(results);
+            res.json(results);
+        })
+        .catch(err => {
+            console.log(err);
+            res.json(err);
+        });
 
 }
 
