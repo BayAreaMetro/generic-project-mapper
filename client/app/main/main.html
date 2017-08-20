@@ -29,7 +29,7 @@
                         <label class="control-label" for="selectbasic">Project Name</label>
                         <select id="selectbasic" name="selectbasic" class="form-control" ng-model="$ctrl.project.name">
                               <option value="TIP">TIP</option>
-                              <option value="Obag">Obag</option>
+                              <option value="OBAG">OBAG</option>
                         </select>
                     </div>
                     <label for="exampleInputEmail2">Project ID</label>
@@ -55,7 +55,7 @@
                                <option value="singleLine">Single Line</option>
                                <option value="multiLine">Multiple Lines</option>
                                <option value="singlePoly">Single Polygon</option>
-                                <option value="multiPoly">Multiple Polygons</option>
+                               <option value="multiPoly">Multiple Polygons</option>
                         </select>
                     </div>
                 </fieldset>
@@ -82,8 +82,8 @@
                             <!-- Button (Double) -->
                             <div class="form-group">
                                 <div style="text-align:right; padding-right:10px;">
-                                    <button id="removeLastFeature" name="button1id" class="btn btn-success" ng-click="$ctrl.removeLastFeature()">Remove Last</button>
-                                    <button id="saveFeature" name="button2id" class="btn btn-danger" ng-click="$ctrl.saveAddNextNetworkRoute()" ng-show="$ctrl.featureExists">Save/Add Next</button>
+                                    <button id="removeLastFeature_Btn" name="button1id" class="btn btn-success hidden" ng-click="$ctrl.removeLastFeature()">Remove Last</button>
+                                    <button id="saveAndContinue_Btn" name="button2id" class="btn btn-danger hidden" ng-click="$ctrl.saveAddNextNetworkRoute()">Save/Add Next</button>
                                 </div>
                             </div>
                         </fieldset>
@@ -95,7 +95,7 @@
             <!-- Button (Double) -->
             <div class="form-group">
                 <div style="text-align:right; padding-right:10px;">
-                    <button id="button1id2" name="button1id" class="btn btn-success" ng-click="$ctrl.saveFeatures()">Submit</button>
+                    <button id="button1id2" name="button1id" class="btn btn-success" ng-click="$ctrl.submitFeatures()">Submit</button>
                     <button id="button2id2" name="button2id" class="btn btn-danger" ng-click="$ctrl.resetMap()">Cancel</button>
                 </div>
             </div>

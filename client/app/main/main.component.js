@@ -33,6 +33,7 @@ export class MainController {
     }
 
     $onInit() {
+
         // console.log(this.multiPartFeatures);
         this.$http.get('/api/things')
             .then(response => {
@@ -184,18 +185,18 @@ export class MainController {
             gmap.drawingManager = new google.maps.drawing.DrawingManager({
                 drawingControlOptions: {
                     position: google.maps.ControlPosition.TOP_CENTER,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.POLYLINE,
-                        google.maps.drawing.OverlayType.POLYGON
-                    ]
+                    // drawingModes: [
+                    //     google.maps.drawing.OverlayType.MARKER,
+                    //     google.maps.drawing.OverlayType.POLYLINE,
+                    //     google.maps.drawing.OverlayType.POLYGON
+                    // ]
                 },
                 markerOptions: gmap.defaults,
                 polygonOptions: gmap.defaults,
                 polylineOptions: gmap.defaults,
                 rectangleOptions: gmap.defaults
             });
-            gmap.drawingManager.setMap(gmap);
+            // gmap.drawingManager.setMap(gmap);
             gmap.enableKeyDragZoom();
 
             // Set map for directions display
@@ -269,8 +270,8 @@ export class MainController {
 
             // GOOGLE AUTOCOMPLETE
             // Autocomplete directions
-            var fromAddress = document.getElementById('fromAddress');
-            var toAddress = document.getElementById('toAddress');
+            fromAddress = document.getElementById('fromAddress');
+            toAddress = document.getElementById('toAddress');
 
             var autocomplete1 = new google.maps.places.Autocomplete(fromAddress);
             var autocomplete2 = new google.maps.places.Autocomplete(toAddress);
@@ -392,6 +393,11 @@ export class MainController {
                 marker1.setVisible(false);
                 marker2.setVisible(false);
 
+                var saveAndContinue_Btn = $('#saveAndContinue_Btn');
+                var removeLast = $('#removeLastFeature_Btn');
+                saveAndContinue_Btn.removeClass('hidden');
+                removeLast.removeClass('hidden');
+
                 directionsService.route({
                     origin: gmap.fromAddress,
                     destination: gmap.toAddress,
@@ -434,7 +440,7 @@ export class MainController {
 
                         //Build WKT string from lat/lngs
                         var networkString = 'LINESTRING (';
-                        var networkString = '';
+                        networkString = '';
                         for (var t = 0; t < finalArray.length; t++) {
                             networkString += finalArray[t] + ',';
                         }
@@ -617,78 +623,100 @@ export class MainController {
     }
 
     setEditType(editType) {
+        this.gmap.drawingManager.drawingControlOptions.drawingModes = [];
         this.editType = editType;
         console.log(this.editType);
         this.gmap.editType = editType;
-        // console.log(this.gmap);
+        if (editType === 'multiLine' || editType === 'singleLine') {
+            this.gmap.drawingManager.drawingControlOptions.drawingModes = [
+                google.maps.drawing.OverlayType.POLYLINE
+            ];
+            this.gmap.drawingManager.setMap(this.gmap);
+        } else if (editType === 'singlePoint' || editType === 'multiPoint') {
+            this.gmap.drawingManager.drawingControlOptions.drawingModes = [
+                google.maps.drawing.OverlayType.MARKER
+            ];
+            this.gmap.drawingManager.setMap(this.gmap);
+        } else if (editType === 'singlePoly' || editType === 'multiPoly') {
+            this.gmap.drawingManager.drawingControlOptions.drawingModes = [
+                google.maps.drawing.OverlayType.POLYGON
+            ];
+            this.gmap.drawingManager.setMap(this.gmap);
+        }
+        console.log(this.gmap);
+
+
     }
 
-    saveFeatures() {
+    submitFeatures() {
         // console.log(document.getElementById('toAddress').value);
         // console.log(document.getElementById('toAddress').value);
         console.log(this.gmap);
+        var multiPartWkt, i;
+        var latLngString;
+
         //Add to multi-part if necessary
         if (this.editType === 'multiPoint') {
 
-            var latLngString = '';
+            latLngString = '';
             for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
+            multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
             // console.log(multiPartWkt);
 
 
         } else if (this.editType === 'multiLine') {
-            var latLngString = '';
-            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+            latLngString = '';
+            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + '(' + this.gmap.multiPartFeatures[i] + '),';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+            multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
             this.mapIt(multiPartWkt);
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'multiPolygon') {
-            var latLngString = '';
-            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+            latlngString = '';
+            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
+            multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'singlePoint') {
-            var latLngString = '';
-            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+            latlngString = '';
+            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'POINT (' + latLngString + ')';
+            multiPartWkt = 'POINT (' + latLngString + ')';
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'singleLine') {
-            var latLngString = '';
-            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+            latlngString = '';
+            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'LINESTRING (' + latLngString + ')';
+            multiPartWkt = 'LINESTRING (' + latLngString + ')';
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'singlePolygon') {
-            var latLngString = '';
-            for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
+            latlngString = '';
+            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
             latLngString = latLngString.slice(0, -1);
 
-            var multiPartWkt = 'POLYGON (' + latLngString + ')';
+            multiPartWkt = 'POLYGON (' + latLngString + ')';
             // console.log(multiPartWkt);
 
         }
@@ -702,7 +730,35 @@ export class MainController {
         this.$http.post('/api/projects/map', mapInfo)
             .then(results => {
                 console.log(results);
-                this.initMap();
+                var saveAndContinue_Btn = $('#saveAndContinue_Btn');
+                saveAndContinue_Btn.addClass('hidden');
+                var removeLastFeature_Btn = $('#removeLastFeature_Btn');
+                removeLastFeature_Btn.addClass('hidden');
+                //Notification
+                $.notify({
+                    // options
+                    icon: 'glyphicon glyphicon-warning-sign',
+                    message: '&nbsp;&nbsp;Project Saved '
+
+                }, {
+                    type: "success",
+                    allow_dismiss: true,
+                    placement: {
+                        from: "top",
+                        align: "center"
+                    },
+                    offset: 20,
+                    spacing: 10,
+                    z_index: 1031,
+                    delay: 5000,
+                    timer: 1000,
+                    animate: {
+                        enter: 'animated fadeInDown',
+                        exit: 'animated fadeOutUp'
+                    },
+                    icon_type: 'class'
+
+                });
             })
             .catch(err => {
                 console.log(err);
@@ -710,10 +766,7 @@ export class MainController {
     }
 
     generateID() {
-        console.log(uuid.v1());
-        console.log('clicked');
         this.project.Id = uuid.v1();
-
     }
 
     resetMap() {
@@ -724,6 +777,55 @@ export class MainController {
         }
         this.gmap.features.length = 0;
         this.gmap.multiPartFeatures = [];
+    }
+
+    removeLastFeature() {
+        this.gmap.features.pop();
+        this.gmap.multiPartFeatures.pop();
+
+
+        // this.gmap.directionsDisplay.setMap(null);
+        // this.gmap.routing.directionsDisplay = null;
+
+        this.gmap.routing.directionsDisplay.setMap(null);
+        this.gmap.routing.directionsDisplay = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: this.gmap
+
+        });
+
+        this.gmap.newNetworkLine.setMap(null);
+        this.toAddress = null;
+        this.fromAddress = null;
+        this.gmap.toAddress = null;
+        this.gmap.fromAddress = null;
+
+        $.notify({
+            // options
+            icon: 'glyphicon glyphicon-warning-sign',
+            message: '&nbsp;&nbsp;Feature Removed '
+
+        }, {
+            type: "info",
+            allow_dismiss: true,
+            placement: {
+                from: "top",
+                align: "center"
+            },
+            offset: 20,
+            spacing: 10,
+            z_index: 1031,
+            delay: 5000,
+            timer: 1000,
+            animate: {
+                enter: 'animated fadeInDown',
+                exit: 'animated fadeOutUp'
+            },
+            icon_type: 'class'
+
+        });
+
+
     }
 
     addThing() {
@@ -759,6 +861,32 @@ export class MainController {
         this.fromAddress = null;
         this.gmap.toAddress = null;
         this.gmap.fromAddress = null;
+
+        $.notify({
+            // options
+            icon: 'glyphicon glyphicon-warning-sign',
+            title: '&nbsp;&nbsp;Feature Added<br>',
+            message: '&nbsp;&nbsp;&nbsp;Project has ' + this.gmap.multiPartFeatures.length + ' feature(s)'
+
+        }, {
+            type: "info",
+            allow_dismiss: true,
+            placement: {
+                from: "top",
+                align: "center"
+            },
+            offset: 20,
+            spacing: 10,
+            z_index: 1031,
+            delay: 5000,
+            timer: 1000,
+            animate: {
+                enter: 'animated fadeInDown',
+                exit: 'animated fadeOutUp'
+            },
+            icon_type: 'class'
+
+        });
 
     }
 
