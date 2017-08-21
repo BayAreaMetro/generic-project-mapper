@@ -26,15 +26,19 @@ export default function(app) {
 
     if (env === 'development' || env === 'test') {
         app.use(express.static(path.join(config.root, '.tmp')));
+        app.set('appPath', path.join(config.root, 'client'));
+        app.use(express.static(app.get('appPath')));
+        app.use(morgan('dev'));
     }
 
     if (env === 'production') {
-        app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
+        // app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
+        app.set('appPath', path.join(config.root, './../client'));
+        app.use(express.static(app.get('appPath')));
+        app.use(morgan('dev'));
     }
 
-    app.set('appPath', path.join(config.root, 'client'));
-    app.use(express.static(app.get('appPath')));
-    app.use(morgan('dev'));
+
 
     app.set('views', `${config.root}/server/views`);
     app.engine('html', require('ejs').renderFile);
