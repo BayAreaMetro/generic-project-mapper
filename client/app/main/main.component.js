@@ -690,34 +690,22 @@ export class MainController {
             // console.log(multiPartWkt);
 
         } else if (this.editType === 'singlePoint') {
-            latlngString = '';
-            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
-            }
-            latLngString = latLngString.slice(0, -1);
-
+            console.log(this.gmap.multiPartFeatures[0]);
+            var latlngString = '';
+            latLngString = this.gmap.multiPartFeatures[0];
+            console.log(latLngString);
             multiPartWkt = 'POINT (' + latLngString + ')';
-            // console.log(multiPartWkt);
+            console.log(multiPartWkt);
 
         } else if (this.editType === 'singleLine') {
-            latlngString = '';
-            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
-            }
-            latLngString = latLngString.slice(0, -1);
-
+            var latlngString = '';
+            latLngString = this.gmap.multiPartFeatures[0];
             multiPartWkt = 'LINESTRING (' + latLngString + ')';
-            // console.log(multiPartWkt);
 
-        } else if (this.editType === 'singlePolygon') {
-            latlngString = '';
-            for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
-            }
-            latLngString = latLngString.slice(0, -1);
-
+        } else if (this.editType === 'singlePoly') {
+            var latlngString = '';
+            latLngString = this.gmap.multiPartFeatures[0];
             multiPartWkt = 'POLYGON (' + latLngString + ')';
-            // console.log(multiPartWkt);
 
         }
 
@@ -734,6 +722,8 @@ export class MainController {
                 saveAndContinue_Btn.addClass('hidden');
                 var removeLastFeature_Btn = $('#removeLastFeature_Btn');
                 removeLastFeature_Btn.addClass('hidden');
+                this.project = {};
+                this.editType = '';
                 //Notification
                 $.notify({
                     // options
