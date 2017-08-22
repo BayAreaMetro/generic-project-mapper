@@ -49,7 +49,7 @@
                     <!-- Select Basic -->
                     <div class="form-group">
                         <label class="control-label" for="selectbasic">Shape Type</label>
-                        <select id="selectbasic2" name="selectbasic" class="form-control" ng-model="editType" ng-change="$ctrl.setEditType(editType)">
+                        <select id="selectbasic2" name="selectbasic" class="form-control" ng-model="$ctrl.editType" ng-change="$ctrl.setEditType($ctrl.editType)">
                                <option value="singlePoint">Single Point</option>
                                <option value="multiPoint">Multiple Points</option>
                                <option value="singleLine">Single Line</option>

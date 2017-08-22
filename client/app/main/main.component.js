@@ -722,6 +722,7 @@ export class MainController {
                 saveAndContinue_Btn.addClass('hidden');
                 var removeLastFeature_Btn = $('#removeLastFeature_Btn');
                 removeLastFeature_Btn.addClass('hidden');
+                this.gmap.multiPartFeatures = [];
                 this.project = {};
                 this.editType = '';
                 //Notification
