@@ -745,12 +745,12 @@ export class MainController {
         };
         console.log(mapInfo);
 
-        if (!this.project.Id || !this.project.name) {
+        if (!this.project.Id || !this.project.name || !this.editType) {
             //Notification
             $.notify({
                 // options
                 icon: 'glyphicon glyphicon-warning-sign',
-                message: '&nbsp;&nbsp;Please select a project name and project Id! '
+                message: '&nbsp;&nbsp;Please select a project name, project Id and shape type! '
 
             }, {
                 type: "danger",
