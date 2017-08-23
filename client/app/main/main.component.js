@@ -886,13 +886,7 @@ export class MainController {
     }
 
     resetMap() {
-        for (var i in this.gmap.features) {
-            if (this.gmap.features.hasOwnProperty(i)) {
-                this.gmap.features[i].setMap(null);
-            }
-        }
-        this.gmap.features.length = 0;
-        this.gmap.multiPartFeatures = [];
+        this.$state.reload();
     }
 
     removeLastFeature() {
