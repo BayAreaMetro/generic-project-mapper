@@ -88,9 +88,29 @@ function handleError(res, statusCode) {
 
 // Gets a list of Projects
 export function index(req, res) {
-    return Project.findAll()
-        .then(respondWithResult(res))
-        .catch(handleError(res));
+
+    sql.getPlainContext()
+        .step("data", {
+            query: "select * FROM [WebGIS].[rpd].[MapApplicatonData]"
+                // optionally you could do this if the
+                // above query were in a readUsers.sql file
+                // query: sql.fromFile( "readUsers" );
+        })
+        .end(function(sets) {
+            console.log(sets);
+            res.json(sets.data);
+            // sets has a "readUsers" property
+            // which contains the results of the query
+        })
+        .error(function(err) {
+            console.log(err);
+            res.json(err);
+        });
+
+
+    // return Project.findAll()
+    //     .then(respondWithResult(res))
+    //     .catch(handleError(res));
 }
 
 // Gets a single Project from the DB

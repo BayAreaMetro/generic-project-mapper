@@ -10,7 +10,7 @@ export class MainController {
 
 
     /*@ngInject*/
-    constructor($http, Auth, $scope) {
+    constructor($http, Auth, $scope, $state) {
         this.$http = $http;
         this.isLoggedIn = Auth.isLoggedInSync;
         this.isAdmin = Auth.isAdminSync;
@@ -28,6 +28,7 @@ export class MainController {
         this.multiPartWkt;
         this.projectId = '';
         this.project = {};
+        this.$state = $state;
         // this.uuid = uuid;
 
     }
@@ -35,10 +36,13 @@ export class MainController {
     $onInit() {
 
         // console.log(this.multiPartFeatures);
-        this.$http.get('/api/things')
+        this.$http.get('/api/projects')
             .then(response => {
-                this.awesomeThings = response.data;
+                this.mappedProjects = response.data;
+                for (var index = 0; index < this.mappedProjects.length; index++) {
+                    mapIt(this.mappedProjects[index].WKT);
 
+                }
             });
 
         var gmap;
@@ -100,7 +104,7 @@ export class MainController {
                 map: gmap
 
             });
-
+            gmap.newNetworkLine = null;
 
             //Directions changed event. Triggers when route is dragged/edited
             gmap.routing.directionsDisplay.addListener('directions_changed', function() {
@@ -109,6 +113,7 @@ export class MainController {
                 computeEditedRoute(gmap.routing.directionsDisplay.getDirections(), gmap.editedRoute);
 
             });
+
 
             //Takes the generated route, adds it to multi-part array and calculates the wkt string
             function computeEditedRoute(result, editedRoute) {
@@ -619,6 +624,85 @@ export class MainController {
 
         }
 
+        function mapIt(wktValue) {
+            /**
+             * Maps the current contents of the textarea.
+             * @return  {Object}    Some sort of geometry object
+             */
+
+            var el, obj, wkt, i;
+
+            // el = document.getElementById('wkt');
+            wkt = new Wkt.Wkt();
+
+
+
+            try { // Catch any malformed WKT strings
+                wkt.read(wktValue);
+            } catch (e1) {
+                try {
+                    wkt.read(wktValue.replace('\n', '').replace('\r', '').replace('\t', ''));
+                } catch (e2) {
+                    if (e2.name === 'WKTError') {
+                        alert('Wicket could not understand the WKT string you entered. Check that you have parentheses balanced, and try removing tabs and newline characters.');
+                        return;
+                    }
+                }
+            }
+
+            obj = wkt.toObject(gmap.defaults); // Make an object
+
+            // Add listeners for overlay editing events
+            if (!Wkt.isArray(obj) && wkt.type !== 'point') {
+                // New vertex is inserted
+                google.maps.event.addListener(obj.getPath(), 'insert_at', function(n) {
+                    app.updateText();
+                });
+                // Existing vertex is removed (insertion is undone)
+                google.maps.event.addListener(obj.getPath(), 'remove_at', function(n) {
+                    app.updateText();
+                });
+                // Existing vertex is moved (set elsewhere)
+                google.maps.event.addListener(obj.getPath(), 'set_at', function(n) {
+                    app.updateText();
+                });
+            } else {
+                if (obj.setEditable) { obj.setEditable(false); }
+            }
+
+            var bounds = new google.maps.LatLngBounds();
+
+            if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
+                for (i in obj) {
+                    if (obj.hasOwnProperty(i) && !Wkt.isArray(obj[i])) {
+                        obj[i].setMap(gmap);
+                        gmap.features.push(obj[i]);
+
+                        if (wkt.type === 'point' || wkt.type === 'multipoint')
+                            bounds.extend(obj[i].getPosition());
+                        else
+                            obj[i].getPath().forEach(function(element, index) { bounds.extend(element) });
+                    }
+                }
+
+                gmap.features = gmap.features.concat(obj);
+            } else {
+                obj.setMap(gmap); // Add it to the map
+                gmap.features.push(obj);
+
+                if (wkt.type === 'point' || wkt.type === 'multipoint')
+                    bounds.extend(obj.getPosition());
+                else
+                    obj.getPath().forEach(function(element, index) { bounds.extend(element) });
+            }
+
+            // Pan the map to the feature
+            // gmap.fitBounds(bounds);
+
+            return obj;
+
+        }
+
         this.gmap = this.initMap();
     }
 
@@ -655,6 +739,40 @@ export class MainController {
         var multiPartWkt, i;
         var latLngString;
 
+        var mapInfo = {
+            name: this.project.name,
+            Id: this.project.Id
+        };
+        console.log(mapInfo);
+
+        if (!this.project.Id || !this.project.name) {
+            //Notification
+            $.notify({
+                // options
+                icon: 'glyphicon glyphicon-warning-sign',
+                message: '&nbsp;&nbsp;Please select a project name and project Id! '
+
+            }, {
+                type: "danger",
+                allow_dismiss: true,
+                placement: {
+                    from: "top",
+                    align: "center"
+                },
+                offset: 20,
+                spacing: 10,
+                z_index: 1031,
+                delay: 5000,
+                timer: 1000,
+                animate: {
+                    enter: 'animated fadeInDown',
+                    exit: 'animated fadeOutUp'
+                },
+                icon_type: 'class'
+
+            });
+        }
+
         //Add to multi-part if necessary
         if (this.editType === 'multiPoint') {
 
@@ -665,7 +783,8 @@ export class MainController {
             latLngString = latLngString.slice(0, -1);
 
             multiPartWkt = 'MULTIPOINT (' + latLngString + ')';
-            // console.log(multiPartWkt);
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
 
         } else if (this.editType === 'multiLine') {
@@ -677,7 +796,8 @@ export class MainController {
 
             multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
             this.mapIt(multiPartWkt);
-            // console.log(multiPartWkt);
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'multiPolygon') {
             latlngString = '';
@@ -687,7 +807,8 @@ export class MainController {
             latLngString = latLngString.slice(0, -1);
 
             multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
-            // console.log(multiPartWkt);
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singlePoint') {
             console.log(this.gmap.multiPartFeatures[0]);
@@ -695,65 +816,69 @@ export class MainController {
             latLngString = this.gmap.multiPartFeatures[0];
             console.log(latLngString);
             multiPartWkt = 'POINT (' + latLngString + ')';
-            console.log(multiPartWkt);
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singleLine') {
             var latlngString = '';
             latLngString = this.gmap.multiPartFeatures[0];
             multiPartWkt = 'LINESTRING (' + latLngString + ')';
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singlePoly') {
             var latlngString = '';
             latLngString = this.gmap.multiPartFeatures[0];
             multiPartWkt = 'POLYGON (' + latLngString + ')';
+            mapInfo.wkt = multiPartWkt;
+            postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         }
 
-        var mapInfo = {
-            name: this.project.name,
-            Id: this.project.Id,
-            wkt: multiPartWkt
-        }
-        console.log(mapInfo);
-        this.$http.post('/api/projects/map', mapInfo)
-            .then(results => {
-                console.log(results);
-                var saveAndContinue_Btn = $('#saveAndContinue_Btn');
-                saveAndContinue_Btn.addClass('hidden');
-                var removeLastFeature_Btn = $('#removeLastFeature_Btn');
-                removeLastFeature_Btn.addClass('hidden');
-                this.gmap.multiPartFeatures = [];
-                this.project = {};
-                this.editType = '';
-                //Notification
-                $.notify({
-                    // options
-                    icon: 'glyphicon glyphicon-warning-sign',
-                    message: '&nbsp;&nbsp;Project Saved '
 
-                }, {
-                    type: "success",
-                    allow_dismiss: true,
-                    placement: {
-                        from: "top",
-                        align: "center"
-                    },
-                    offset: 20,
-                    spacing: 10,
-                    z_index: 1031,
-                    delay: 5000,
-                    timer: 1000,
-                    animate: {
-                        enter: 'animated fadeInDown',
-                        exit: 'animated fadeOutUp'
-                    },
-                    icon_type: 'class'
 
+
+        function postProject(mapInfo, $http, gmap, $state) {
+            $http.post('/api/projects/map', mapInfo)
+                .then(results => {
+                    console.log(results);
+                    var saveAndContinue_Btn = $('#saveAndContinue_Btn');
+                    saveAndContinue_Btn.addClass('hidden');
+                    var removeLastFeature_Btn = $('#removeLastFeature_Btn');
+                    removeLastFeature_Btn.addClass('hidden');
+                    gmap.multiPartFeatures = [];
+                    //Notification
+                    $.notify({
+                        // options
+                        icon: 'glyphicon glyphicon-warning-sign',
+                        message: '&nbsp;&nbsp;Project Saved '
+
+                    }, {
+                        type: "success",
+                        allow_dismiss: true,
+                        placement: {
+                            from: "top",
+                            align: "center"
+                        },
+                        offset: 20,
+                        spacing: 10,
+                        z_index: 1031,
+                        delay: 5000,
+                        timer: 1000,
+                        animate: {
+                            enter: 'animated fadeInDown',
+                            exit: 'animated fadeOutUp'
+                        },
+                        icon_type: 'class'
+
+                    });
+
+                    $state.reload();
+                })
+                .catch(err => {
+                    console.log(err);
                 });
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        }
     }
 
     generateID() {
