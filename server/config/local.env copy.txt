@@ -1,0 +1,28 @@
+'use strict';
+
+// Use local.env.js for environment variables that grunt will set when the server starts locally.
+// Use for your api keys, secrets, etc. This file should not be tracked by git.
+//
+// You will need to set these on the server you deploy to.
+
+module.exports = {
+    DOMAIN: 'http://localhost:9000',
+    SESSION_SECRET: 'test-secret',
+    GOOGLE_ID: 'app-id',
+    GOOGLE_SECRET: 'secret',
+    NODE_ENV: 'development',
+    SQL_USER: 'ksmith',
+    SQL_PWD: 'GIS@mtc349',
+    SERVER: 'gisdb2.c4ttzt2cz0de.us-west-2.rds.amazonaws.com',
+    DATABASE: 'WebGIS',
+    SENDGRID_USER: 'rtp2017',
+    SENDGRID_PWD: 'GIS@rtp101',
+    GITHUB_USER: 'MTCGIS',
+    GITHUB_PWD: 'GIS@mtc101',
+    // SQL_USER: 'rtpLiveUser',
+    // SQL_PWD: 'GIS@rtplive101',
+    // // DATABASE: 'RTP2017_Production_20160315',
+
+    // Control debug level for modules using visionmedia/debug
+    DEBUG: ''
+};

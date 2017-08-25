@@ -21,12 +21,12 @@ export class MainController {
         this.multiLine = [];
         this.singlePoly = [];
         this.multiPoly = [];
-        this.editType;
+        this.editType = null;
         this.$scope = $scope;
         this.multiPartFeatures = [];
-        this.selectedWkt;
-        this.multiPartWkt;
-        this.projectId = '';
+        this.selectedWkt = null;
+        this.multiPartWkt = null;
+        this.projectId = null;
         this.project = {};
         this.$state = $state;
         // this.uuid = uuid;
@@ -38,6 +38,7 @@ export class MainController {
         // console.log(this.multiPartFeatures);
         this.$http.get('/api/projects')
             .then(response => {
+                console.log(response);
                 this.mappedProjects = response.data;
                 for (var index = 0; index < this.mappedProjects.length; index++) {
                     mapIt(this.mappedProjects[index].WKT);
@@ -57,6 +58,7 @@ export class MainController {
             var toAddress;
             var marker1, marker2;
 
+            //Create initial map object
             gmap = new google.maps.Map(document.getElementById('canvas'), {
                 center: new google.maps.LatLng(37.796966, -122.275051),
                 defaults: {
@@ -85,6 +87,8 @@ export class MainController {
                     style: google.maps.ZoomControlStyle.SMALL
                 }
             });
+
+
 
 
             /**
@@ -117,7 +121,8 @@ export class MainController {
 
             //Takes the generated route, adds it to multi-part array and calculates the wkt string
             function computeEditedRoute(result, editedRoute) {
-
+                gmap.multiPartFeatures.pop();
+                console.log(editedRoute);
 
                 if (editedRoute) {
                     console.log(result);
@@ -395,8 +400,8 @@ export class MainController {
              * 
              */
             gmap.calculateAndDisplayRoute = function(directionsService, directionsDisplay) {
-                marker1.setVisible(false);
-                marker2.setVisible(false);
+                // marker1.setVisible(false);
+                // marker2.setVisible(false);
 
                 var saveAndContinue_Btn = $('#saveAndContinue_Btn');
                 var removeLast = $('#removeLastFeature_Btn');
@@ -453,7 +458,7 @@ export class MainController {
                         //Remove final , and add closing )
                         networkString = networkString.slice(0, -1);
                         // lineString = lineString + ')';
-                        console.log(networkString);
+                        // console.log(networkString);
                         gmap.networkString = networkString;
 
                         // gmap.multiPartFeatures.push(lineString);
@@ -467,8 +472,8 @@ export class MainController {
                         }
                         latLngString = latLngString.slice(0, -1);
                         multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
-                        console.log('the wkt');
-                        console.log(multiPartWkt);
+                        // console.log('the wkt');
+                        // console.log(multiPartWkt);
                         gmap.featureLength = gmap.multiPartFeatures.length;
                         // this.$apply();
 
@@ -707,6 +712,8 @@ export class MainController {
     }
 
     setEditType(editType) {
+        var routeInfoDiv = $('#routeInfoDiv');
+
         this.gmap.drawingManager.drawingControlOptions.drawingModes = [];
         this.editType = editType;
         console.log(this.editType);
@@ -716,6 +723,8 @@ export class MainController {
                 google.maps.drawing.OverlayType.POLYLINE
             ];
             this.gmap.drawingManager.setMap(this.gmap);
+            routeInfoDiv.removeClass('hidden');
+
         } else if (editType === 'singlePoint' || editType === 'multiPoint') {
             this.gmap.drawingManager.drawingControlOptions.drawingModes = [
                 google.maps.drawing.OverlayType.MARKER
@@ -847,6 +856,7 @@ export class MainController {
                     var removeLastFeature_Btn = $('#removeLastFeature_Btn');
                     removeLastFeature_Btn.addClass('hidden');
                     gmap.multiPartFeatures = [];
+                    // gmap.editRoute = false;
                     //Notification
                     $.notify({
                         // options
@@ -872,6 +882,23 @@ export class MainController {
                         icon_type: 'class'
 
                     });
+
+
+                    gmap.routing = {};
+                    gmap.routing.directionsService = new google.maps.DirectionsService;
+                    gmap.routing.directionsDisplay = new google.maps.DirectionsRenderer({
+                        draggable: true,
+                        map: gmap
+
+                    });
+                    var directionsService = new google.maps.DirectionsService;
+                    var directionsDisplay = new google.maps.DirectionsRenderer({
+                        draggable: true,
+                        map: gmap
+
+                    });
+                    gmap.newNetworkLine = null;
+                    gmap.editRoute = false;
 
                     $state.reload();
                 })
@@ -998,6 +1025,186 @@ export class MainController {
 
         });
 
+    }
+
+    setToAddress() {
+        // console.log(this.gmap);
+        var gmap = this.gmap;
+        console.log('seeting to address');
+        gmap.setOptions({ draggableCursor: 'crosshair' });
+
+        google.maps.event.addListener(gmap, 'click', function(event) {
+            // alert("Latitude: " + event.latLng.lat() + " " + ", longitude: " + event.latLng.lng());
+            var latlng = { lat: event.latLng.lat(), lng: event.latLng.lng() };
+            var geocoder = new google.maps.Geocoder;
+            geocoder.geocode({ 'location': latlng }, function(results, status) {
+                if (status === 'OK') {
+                    console.log(results);
+                    if (results[0]) {
+                        var toAddress = document.getElementById('toAddress');
+                        toAddress.value = results[0].formatted_address;
+                        // gmap.setZoom(11);
+                        var marker = new google.maps.Marker({
+                            position: latlng,
+                            map: gmap
+                        });
+                        // infowindow.setContent(results[0].formatted_address);
+                        // infowindow.open(map, marker);
+                        google.maps.event.clearListeners(gmap, 'click');
+                        gmap.setOptions({ draggableCursor: 'default' });
+
+                    } else {
+                        window.alert('No results found');
+                        google.maps.event.clearListeners(gmap, 'click');
+                        gmap.setOptions({ draggableCursor: 'default' });
+                    }
+                } else {
+                    window.alert('Geocoder failed due to: ' + status);
+                    google.maps.event.clearListeners(gmap, 'click');
+                    gmap.setOptions({ draggableCursor: 'default' });
+                }
+            });
+        });
+        // console.log('testing');
+
+
+    }
+
+    setFromAddress() {
+        var gmap = this.gmap;
+        console.log('seeting to address');
+        gmap.setOptions({ draggableCursor: 'crosshair' });
+        google.maps.event.addListener(gmap, 'click', function(event) {
+
+            // alert("Latitude: " + event.latLng.lat() + " " + ", longitude: " + event.latLng.lng());
+            var latlng = { lat: event.latLng.lat(), lng: event.latLng.lng() };
+            var geocoder = new google.maps.Geocoder;
+            geocoder.geocode({ 'location': latlng }, function(results, status) {
+                if (status === 'OK') {
+                    console.log(results);
+                    if (results[0]) {
+                        var fromAddress = document.getElementById('fromAddress');
+                        fromAddress.value = results[0].formatted_address;
+                        // gmap.setZoom(11);
+                        var marker = new google.maps.Marker({
+                            position: latlng,
+                            map: gmap
+                        });
+                        // infowindow.setContent(results[0].formatted_address);
+                        // infowindow.open(map, marker);
+                        google.maps.event.clearListeners(gmap, 'click');
+                        gmap.setOptions({ draggableCursor: 'default' });
+                    } else {
+                        window.alert('No results found');
+                        google.maps.event.clearListeners(gmap, 'click');
+                        gmap.setOptions({ draggableCursor: 'default' });
+                    }
+                } else {
+                    window.alert('Geocoder failed due to: ' + status);
+                    google.maps.event.clearListeners(gmap, 'click');
+                    gmap.setOptions({ draggableCursor: 'default' });
+                }
+            });
+        });
+    }
+
+    calculateRoute() {
+        var fromAddress = document.getElementById('fromAddress').value;
+        var toAddress = document.getElementById('toAddress').value;
+
+        console.log(fromAddress);
+        console.log(toAddress);
+        var gmap = this.gmap;
+        var multiPartWkt;
+
+        var saveAndContinue_Btn = $('#saveAndContinue_Btn');
+        var removeLast = $('#removeLastFeature_Btn');
+        saveAndContinue_Btn.removeClass('hidden');
+        removeLast.removeClass('hidden');
+
+        gmap.routing.directionsService.route({
+            origin: fromAddress,
+            destination: toAddress,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, function(response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+                gmap.routing.directionsDisplay.setDirections(response);
+                // console.log(response);
+                var i = 0;
+                var j = 0;
+                //console.log(response);
+                var pointsArray = response.routes[0].overview_path;
+                var finalArray = [];
+
+                //Create an array of Lat/Lngs from response overview_path
+                for (j = 0; j < pointsArray.length; j++) {
+                    finalArray[i] = pointsArray[j].lng() + ' ' + pointsArray[j].lat();
+                    i++;
+
+                }
+
+                console.log('changed');
+
+
+                var decodedPath = google.maps.geometry.encoding.decodePath(response.routes[0].overview_polyline);
+                // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                // var newNetworkLine;
+                gmap.newNetworkLine = new google.maps.Polyline({
+                    path: decodedPath,
+                    // levels: decodedLevels,
+                    strokeColor: '#2196f3',
+                    fillColor: '#2196f3',
+                    fillOpacity: 0.6,
+                    strokeWeight: 14,
+                    map: gmap
+                });
+
+
+
+
+                //Build WKT string from lat/lngs
+                var networkString = 'LINESTRING (';
+                networkString = '';
+                for (var t = 0; t < finalArray.length; t++) {
+                    networkString += finalArray[t] + ',';
+                }
+
+                //Remove final , and add closing )
+                networkString = networkString.slice(0, -1);
+                // lineString = lineString + ')';
+                // console.log(networkString);
+                gmap.networkString = networkString;
+
+                gmap.multiPartFeatures.push(finalArray);
+                // console.log(gmap.multiPartFeatures);
+                // console.log('added value from click event');
+                // //console.log(multiPartFeatures);
+                var latLngString = '';
+                for (i = 0; i < gmap.multiPartFeatures.length; i++) {
+                    latLngString = latLngString + gmap.multiPartFeatures[i] + ',';
+                    // //console.log(latLngString);
+                }
+                latLngString = latLngString.slice(0, -1);
+                multiPartWkt = 'MULTILINESTRING (' + latLngString + ')';
+                // console.log('the wkt');
+                // console.log(multiPartWkt);
+                gmap.featureLength = gmap.multiPartFeatures.length;
+                // this.$apply();
+
+                //Set update parameters
+                this.routeFeatureWkt = networkString;
+                if (gmap.multiPartFeatures.length > 1) {
+                    this.routeFeatureWkt = multiPartWkt;
+                }
+                this.idPrefix = 'LN-';
+                this.shape = 'Line';
+
+                gmap.editedRoute = true;
+
+            } else {
+                window.alert('Directions request failed due to ' + status);
+            }
+        });
     }
 
     mapIt(wktValue) {

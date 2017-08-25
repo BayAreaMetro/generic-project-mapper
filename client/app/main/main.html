@@ -60,7 +60,7 @@
                     </div>
                 </fieldset>
             </form>
-            <div class="panel panel-default">
+            <div class="panel panel-default hidden" id="routeInfoDiv">
                 <div class="panel-heading">
                     Routing Info
                 </div>
@@ -68,24 +68,34 @@
                     <form>
                         <fieldset>
                             <!-- Text input-->
-                            <div class="form-group">
-                                <label class="control-label" for="textinput">From</label>
+                            <label class="control-label" for="textinput">From</label>
+                            <div class="form-group form-inline">
+                                <!-- <label class="control-label" for="textinput">From</label> -->
                                 <input id="fromAddress" name="textinput" class="form-control input-md" type="text" ng-model="$ctrl.fromAddress">
                                 <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
+                                <button type="submit" class="btn btn-success" ng-click="$ctrl.setFromAddress()"> <i class="fa fa-map-pin"></i></button>
                             </div>
                             <!-- Text input-->
-                            <div class="form-group">
-                                <label class="control-label" for="textinput">To</label>
-                                <input id="toAddress" name="textinput" class="form-control input-md" type="text" ng-model="$ctrl.toAddress">
+                            <label class="control-label" for="textinput">To</label>
+                            <div class="form-group form-inline">
+                                <input id="toAddress" name="textinput" class="form-control input-md" type="text" ng-model="$ctrl.toAddress" ng-change="$ctrl.calculateRoute($ctrl.fromAddress,$ctrl.toAddress)">
                                 <!-- <span class="help-block">Add existing unique ID, or generate a new one</span> -->
+                                <button type="submit" class="btn btn-danger" ng-click="$ctrl.setToAddress()"><i class="fa fa-map-pin"></i></button>
                             </div>
                             <!-- Button (Double) -->
                             <div class="form-group">
-                                <div style="text-align:right; padding-right:10px;">
+                                <div style="text-align:left; padding-right:10px;">
+                                    <button id="calculateRoute_Btn" name="button1id" class="btn btn-success" ng-click="$ctrl.calculateRoute()">Calculate Route <i class="fa fa-chevron-right"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div style="text-align:left; padding-right:10px;">
                                     <button id="removeLastFeature_Btn" name="button1id" class="btn btn-success hidden" ng-click="$ctrl.removeLastFeature()">Remove Last</button>
                                     <button id="saveAndContinue_Btn" name="button2id" class="btn btn-danger hidden" ng-click="$ctrl.saveAddNextNetworkRoute()">Save/Add Next</button>
                                 </div>
                             </div>
+
                         </fieldset>
                     </form>
                 </div>
