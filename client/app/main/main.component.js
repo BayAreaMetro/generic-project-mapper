@@ -29,13 +29,15 @@ export class MainController {
         this.projectId = null;
         this.project = {};
         this.$state = $state;
+        this.marker1 = null;
+        this.marker2 = null;
         // this.uuid = uuid;
 
     }
 
     $onInit() {
 
-        // console.log(this.multiPartFeatures);
+        //Query database for currently mapped projects
         this.$http.get('/api/projects')
             .then(response => {
                 console.log(response);
@@ -47,7 +49,6 @@ export class MainController {
             });
 
         var gmap;
-        // gmap.multiPartFeatures = [];
 
         this.initMap = function() {
 
@@ -108,11 +109,12 @@ export class MainController {
                 map: gmap
 
             });
-            gmap.newNetworkLine = null;
+            // gmap.newNetworkLine = null;
 
             //Directions changed event. Triggers when route is dragged/edited
             gmap.routing.directionsDisplay.addListener('directions_changed', function() {
                 // computeEditedRoute(directionsDisplay.getDirections());
+                console.log('you edited the route');
                 console.log(gmap.editedRoute);
                 computeEditedRoute(gmap.routing.directionsDisplay.getDirections(), gmap.editedRoute);
 
@@ -998,6 +1000,7 @@ export class MainController {
         this.fromAddress = null;
         this.gmap.toAddress = null;
         this.gmap.fromAddress = null;
+        this.gmap.editedRoute = false;
 
         $.notify({
             // options
@@ -1024,6 +1027,103 @@ export class MainController {
             icon_type: 'class'
 
         });
+        var gmap = this.gmap;
+        gmap.routing = {};
+        gmap.routing.directionsService = new google.maps.DirectionsService;
+        gmap.routing.directionsDisplay = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: gmap
+
+        });
+        var directionsService = new google.maps.DirectionsService;
+        var directionsDisplay = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: gmap
+
+        });
+        // gmap.newNetworkLine = null;
+
+        //Directions changed event. Triggers when route is dragged/edited
+        gmap.routing.directionsDisplay.addListener('directions_changed', function() {
+            // computeEditedRoute(directionsDisplay.getDirections());
+            console.log('you edited the route');
+            console.log(gmap.editedRoute);
+            computeEditedRoute(gmap.routing.directionsDisplay.getDirections(), gmap.editedRoute);
+
+        });
+
+
+        //Takes the generated route, adds it to multi-part array and calculates the wkt string
+        function computeEditedRoute(result, editedRoute) {
+            gmap.multiPartFeatures.pop();
+            console.log(editedRoute);
+
+            if (editedRoute) {
+                console.log(result);
+                console.log('re-calculated');
+                var i = 0;
+                var j = 0;
+                //console.log(response);
+                var pointsArray = result.routes[0].overview_path;
+                var finalArray = [];
+
+                //Create an array of Lat/Lngs from response overview_path
+                for (j = 0; j < pointsArray.length; j++) {
+                    finalArray[i] = pointsArray[j].lng() + ' ' + pointsArray[j].lat();
+                    i++;
+
+                }
+
+                //Build WKT string from lat/lngs
+                var lineString = '';
+                for (var t = 0; t < finalArray.length; t++) {
+                    lineString += finalArray[t] + ',';
+                }
+
+                //Remove final , and add closing )
+                lineString = lineString.slice(0, -1);
+                gmap.networkString = lineString;
+                // lineString = lineString + ')';
+
+                //Remove last value from array and re-add the edited value
+                // console.log(gmap.multiPartFeatures.length);
+                // gmap.multiPartFeatures.pop();
+                // console.log(gmap.multiPartFeatures.length);
+                // gmap.multiPartFeatures.push(lineString.slice(11));
+                // gmap.networkString = 
+                // console.log(gmap.multiPartFeatures.length);
+                console.log('added value from edit route event');
+
+                var decodedPath = google.maps.geometry.encoding.decodePath(result.routes[0].overview_polyline);
+                // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                // var newNetworkLine;
+                gmap.newNetworkLine.setMap(null);
+                gmap.newNetworkLine = null;
+                gmap.newNetworkLine = new google.maps.Polyline({
+                    path: decodedPath,
+                    // levels: decodedLevels,
+                    strokeColor: '#2196f3',
+                    fillColor: '#2196f3',
+                    fillOpacity: 0.6,
+                    strokeWeight: 14,
+                    map: gmap
+                });
+
+
+                //Set update parameters
+                // $scope.routeFeatureWkt = lineString;
+                // if ($scope.multiPartFeatures.length > 1) {
+                //     $scope.routeFeatureWkt = $scope.multiPartWkt;
+                // }
+                // $scope.idPrefix = 'LN-';
+                // $scope.shape = 'Line';
+            }
+        }
+
+
+
+
+        gmap.editedRoute = false;
 
     }
 
@@ -1200,6 +1300,7 @@ export class MainController {
                 this.shape = 'Line';
 
                 gmap.editedRoute = true;
+                console.log(gmap.editedRoute, ' the edited route');
 
             } else {
                 window.alert('Directions request failed due to ' + status);
