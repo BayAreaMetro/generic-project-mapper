@@ -992,7 +992,7 @@ export class MainController {
 
         });
 
-
+        this.gmap.multiPartFeatures.pop();
         this.gmap.multiPartFeatures.push(this.gmap.networkString);
         this.gmap.networkString = '';
         console.log(this.gmap.multiPartFeatures.length);
@@ -1042,6 +1042,7 @@ export class MainController {
 
         });
         // gmap.newNetworkLine = null;
+        gmap.editedRoute = false;
 
         //Directions changed event. Triggers when route is dragged/edited
         gmap.routing.directionsDisplay.addListener('directions_changed', function() {
@@ -1055,10 +1056,11 @@ export class MainController {
 
         //Takes the generated route, adds it to multi-part array and calculates the wkt string
         function computeEditedRoute(result, editedRoute) {
-            gmap.multiPartFeatures.pop();
+
             console.log(editedRoute);
 
             if (editedRoute) {
+                gmap.multiPartFeatures.pop();
                 console.log(result);
                 console.log('re-calculated');
                 var i = 0;
@@ -1083,6 +1085,7 @@ export class MainController {
                 //Remove final , and add closing )
                 lineString = lineString.slice(0, -1);
                 gmap.networkString = lineString;
+                gmap.multiPartFeatures.push(gmap.networkString);
                 // lineString = lineString + ')';
 
                 //Remove last value from array and re-add the edited value
@@ -1123,7 +1126,7 @@ export class MainController {
 
 
 
-        gmap.editedRoute = false;
+
 
     }
 
