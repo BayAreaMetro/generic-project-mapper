@@ -710,6 +710,11 @@ export class MainController {
                                 this.ID +
                                 '</td>' +
                                 '</tr>' +
+                                '<tr>' +
+                                '<td>' +
+                                ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i></button>' +
+                                '</td>' +
+                                '</tr>' +
                                 '</tbody>' +
                                 '</table>' +
                                 '</div>' +
@@ -753,6 +758,11 @@ export class MainController {
                         '</td>' +
                         '<td> ' +
                         this.ID +
+                        '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td>' +
+                        ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i></button>' +
                         '</td>' +
                         '</tr>' +
                         '</tbody>' +
@@ -1043,6 +1053,10 @@ export class MainController {
         });
 
 
+    }
+
+    test() {
+        console.log('nice one');
     }
 
     addThing() {
