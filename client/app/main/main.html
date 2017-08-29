@@ -30,11 +30,12 @@
                         <select id="selectbasic" name="selectbasic" class="form-control" ng-model="$ctrl.project.name">
                               <option value="TIP">TIP</option>
                               <option value="OBAG">OBAG</option>
+                               <option value="RTP">RTP</option>
                         </select>
                     </div>
                     <label for="exampleInputEmail2">Project ID</label>
                     <div class="form-group form-inline">
-                        <input type="text" class="form-control" id="exampleInputEmail2" ng-model="$ctrl.project.Id" style="width:70%;">
+                        <input type="text" class="form-control" id="exampleInputEmail2" ng-model="$ctrl.project.Id" style="width:70%;" placeholder="Enter ID or Generate New">
                         <button type="submit" class="btn btn-default" ng-click="$ctrl.generateID()">Generate</button>
                     </div>
                     <input id="pac-input" class="controls" type="text" placeholder="Search Box">

@@ -43,7 +43,11 @@ export class MainController {
                 console.log(response);
                 this.mappedProjects = response.data;
                 for (var index = 0; index < this.mappedProjects.length; index++) {
-                    mapIt(this.mappedProjects[index].WKT);
+                    var object = mapIt(this.mappedProjects[index].WKT, this.mappedProjects[index]);
+                    // object.addListener('click', function(event) {
+                    //     console.log(event);
+                    // });
+                    console.log(object);
 
                 }
             });
@@ -627,11 +631,12 @@ export class MainController {
             gmap.directionsDisplay = directionsDisplay;
             gmap.directionsService = directionsService;
 
+
             return gmap;
 
         }
 
-        function mapIt(wktValue) {
+        function mapIt(wktValue, object) {
             /**
              * Maps the current contents of the textarea.
              * @return  {Object}    Some sort of geometry object
@@ -659,6 +664,7 @@ export class MainController {
 
             obj = wkt.toObject(gmap.defaults); // Make an object
 
+
             // Add listeners for overlay editing events
             if (!Wkt.isArray(obj) && wkt.type !== 'point') {
                 // New vertex is inserted
@@ -678,11 +684,45 @@ export class MainController {
             }
 
             var bounds = new google.maps.LatLngBounds();
-
+            gmap.infowindow = new google.maps.InfoWindow;
             if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
                 for (i in obj) {
                     if (obj.hasOwnProperty(i) && !Wkt.isArray(obj[i])) {
                         obj[i].setMap(gmap);
+                        obj[i].Project = object.Project;
+                        obj[i].ID = object.ID;
+
+                        google.maps.event.addListener(obj[i], 'click', function(event) {
+                            if (gmap.infowindow) {
+                                gmap.infowindow.close();
+                            }
+                            var contentString = '<div>' +
+                                '<table class="table">' +
+                                '<thead style="background-color:blue;color:white;">' +
+                                '<h5>' + this.Project + '</h5>' +
+                                '  </thead>' +
+                                '<tbody>' +
+                                '<tr>' +
+                                '<td>' +
+                                'Project ID:' +
+                                '</td>' +
+                                '<td> ' +
+                                this.ID +
+                                '</td>' +
+                                '</tr>' +
+                                '</tbody>' +
+                                '</table>' +
+                                '</div>' +
+                                '<div id="chart_div"></div>';
+                            var position = {
+                                lat: event.latLng.lat(),
+                                lng: event.latLng.lng()
+                            };
+                            console.log(position);
+                            gmap.infowindow.setPosition(position);
+                            gmap.infowindow.setContent(contentString);
+                            gmap.infowindow.open(gmap);
+                        });
                         gmap.features.push(obj[i]);
 
                         if (wkt.type === 'point' || wkt.type === 'multipoint')
@@ -694,7 +734,44 @@ export class MainController {
 
                 gmap.features = gmap.features.concat(obj);
             } else {
-                obj.setMap(gmap); // Add it to the map
+                obj.setMap(gmap);
+                obj.Project = object.Project;
+                obj.ID = object.ID;
+                google.maps.event.addListener(obj, 'click', function(event) {
+                    if (gmap.infowindow) {
+                        gmap.infowindow.close();
+                    }
+                    var contentString = '<div>' +
+                        '<table class="table">' +
+                        '<thead style="background-color:blue;color:white;">' +
+                        '<h5>' + this.Project + '</h5>' +
+                        '  </thead>' +
+                        '<tbody>' +
+                        '<tr>' +
+                        '<td>' +
+                        'Project ID:' +
+                        '</td>' +
+                        '<td> ' +
+                        this.ID +
+                        '</td>' +
+                        '</tr>' +
+                        '</tbody>' +
+                        '</table>' +
+                        '</div>' +
+                        '<div id="chart_div"></div>';
+                    var position = {
+                        lat: event.latLng.lat(),
+                        lng: event.latLng.lng()
+                    };
+                    console.log(position);
+                    gmap.infowindow.setPosition(position);
+                    gmap.infowindow.setContent(contentString);
+                    gmap.infowindow.open(gmap);
+                });
+                // obj.addListener('click', function(event) {
+                //     console.log(event);
+                // });
+                // Add it to the map
                 gmap.features.push(obj);
 
                 if (wkt.type === 'point' || wkt.type === 'multipoint')
@@ -705,6 +782,7 @@ export class MainController {
 
             // Pan the map to the feature
             // gmap.fitBounds(bounds);
+
 
             return obj;
 
@@ -1211,6 +1289,45 @@ export class MainController {
         });
     }
 
+    deleteFeature(id) {
+        console.log(id);
+        this.$http.post('/api/projects/remove/' + id)
+            .then(response => {
+                console.log(response);
+                //Alert message
+                //Notification
+                $.notify({
+                    // options
+                    icon: 'glyphicon glyphicon-warning-sign',
+                    message: '&nbsp;&nbsp;Project successfully removed from database! '
+
+                }, {
+                    type: "success",
+                    allow_dismiss: true,
+                    placement: {
+                        from: "top",
+                        align: "center"
+                    },
+                    offset: 20,
+                    spacing: 10,
+                    z_index: 1031,
+                    delay: 5000,
+                    timer: 1000,
+                    animate: {
+                        enter: 'animated fadeInDown',
+                        exit: 'animated fadeOutUp'
+                    },
+                    icon_type: 'class'
+
+                });
+                //Reload state
+                this.$state.reload();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
     calculateRoute() {
         var fromAddress = document.getElementById('fromAddress').value;
         var toAddress = document.getElementById('toAddress').value;
@@ -1376,6 +1493,7 @@ export class MainController {
         } else {
             obj.setMap(this.gmap); // Add it to the map
             this.gmap.features.push(obj);
+
 
             if (wkt.type === 'point' || wkt.type === 'multipoint')
                 bounds.extend(obj.getPosition());
