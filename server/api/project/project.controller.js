@@ -135,6 +135,7 @@ export function create(req, res) {
 
 export function addMap(req, res) {
     var data = req.body;
+    var dateAdded = new Date();
     // console.log(req.body);
     // sql.execute({
     //     query: "SELECT * FROM [vgiryavets].[InitialDataSurvey]"
@@ -149,7 +150,7 @@ export function addMap(req, res) {
 
     var updateMember = function(Id, wkt, project) {
         return sql.execute({
-            procedure: "[rpd].[InsertMappingDataApplication]",
+            procedure: "[rpd].[sp_InsertMappingDataApplication]",
             params: {
                 Id: {
                     type: sql.NVARCHAR(60),
@@ -162,6 +163,10 @@ export function addMap(req, res) {
                 Project: {
                     type: sql.NVARCHAR(),
                     val: project
+                },
+                Date: {
+                    type: sql.DateTime2,
+                    val: dateAdded
                 }
             }
         });
@@ -214,12 +219,27 @@ export function patch(req, res) {
 
 // Deletes a Project from the DB
 export function destroy(req, res) {
-    return Project.find({
-            where: {
-                _id: req.params.id
+    var id = req.params.id;
+    var deleteMap = function(Id) {
+        return sql.execute({
+            procedure: "[rpd].[sp_DeleteMappingDataApplication]",
+            params: {
+                Id: {
+                    type: sql.NVARCHAR(60),
+                    val: Id
+                }
             }
+        });
+    };
+
+
+    deleteMap(id)
+        .then(results => {
+            console.log(results);
+            res.json(results);
         })
-        .then(handleEntityNotFound(res))
-        .then(removeEntity(res))
-        .catch(handleError(res));
+        .catch(err => {
+            console.log(err);
+            res.json(err);
+        });
 }

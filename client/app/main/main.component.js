@@ -36,18 +36,18 @@ export class MainController {
     }
 
     $onInit() {
-
+        // console.log(this.$http);
         //Query database for currently mapped projects
         this.$http.get('/api/projects')
             .then(response => {
                 console.log(response);
                 this.mappedProjects = response.data;
                 for (var index = 0; index < this.mappedProjects.length; index++) {
-                    var object = mapIt(this.mappedProjects[index].WKT, this.mappedProjects[index]);
+                    var object = mapIt(this.mappedProjects[index].WKT, this.mappedProjects[index], this.$http, this.$state);
                     // object.addListener('click', function(event) {
                     //     console.log(event);
                     // });
-                    console.log(object);
+                    // console.log(object);
 
                 }
             });
@@ -73,7 +73,7 @@ export class MainController {
                     strokeColor: 'red',
                     fillColor: '#2196f3',
                     fillOpacity: 0.6,
-                    strokeWeight: 14
+                    strokeWeight: 7
 
                 },
                 disableDefaultUI: true,
@@ -634,9 +634,9 @@ export class MainController {
 
             return gmap;
 
-        }
+        };
 
-        function mapIt(wktValue, object) {
+        function mapIt(wktValue, object, $http, $state) {
             /**
              * Maps the current contents of the textarea.
              * @return  {Object}    Some sort of geometry object
@@ -712,7 +712,7 @@ export class MainController {
                                 '</tr>' +
                                 '<tr>' +
                                 '<td>' +
-                                ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i></button>' +
+                                ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i>&nbsp;&nbsp;Delete</button>' +
                                 '</td>' +
                                 '</tr>' +
                                 '</tbody>' +
@@ -746,6 +746,7 @@ export class MainController {
                     if (gmap.infowindow) {
                         gmap.infowindow.close();
                     }
+                    var ID = this.ID;
                     var contentString = '<div>' +
                         '<table class="table">' +
                         '<thead style="background-color:blue;color:white;">' +
@@ -762,7 +763,7 @@ export class MainController {
                         '</tr>' +
                         '<tr>' +
                         '<td>' +
-                        ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i></button>' +
+                        ' <button id="delete_Btn" type="submit" class="btn btn-danger"> <i class="fa fa-trash-o"></i></button>' +
                         '</td>' +
                         '</tr>' +
                         '</tbody>' +
@@ -777,6 +778,72 @@ export class MainController {
                     gmap.infowindow.setPosition(position);
                     gmap.infowindow.setContent(contentString);
                     gmap.infowindow.open(gmap);
+                    // console.log(this.$http);
+                    // var http = this.$http;
+                    // console.log(http);
+                    document.getElementById("delete_Btn").addEventListener("click", function() {
+                        $http.delete('/api/projects/' + ID)
+                            .then(response => {
+                                console.log(response);
+                                //Notification
+                                $.notify({
+                                    // options
+                                    icon: 'glyphicon glyphicon-warning-sign',
+                                    message: '&nbsp;&nbsp;Project Deleted from Database! '
+
+                                }, {
+                                    type: "danger",
+                                    allow_dismiss: true,
+                                    placement: {
+                                        from: "top",
+                                        align: "center"
+                                    },
+                                    offset: 20,
+                                    spacing: 10,
+                                    z_index: 1031,
+                                    delay: 5000,
+                                    timer: 1000,
+                                    animate: {
+                                        enter: 'animated fadeInDown',
+                                        exit: 'animated fadeOutUp'
+                                    },
+                                    icon_type: 'class'
+
+                                });
+                                $state.reload();
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                //Notification
+                                $.notify({
+                                    // options
+                                    icon: 'glyphicon glyphicon-warning-sign',
+                                    message: '&nbsp;&nbsp;An error occurred trying to delete this project! '
+
+                                }, {
+                                    type: "danger",
+                                    allow_dismiss: true,
+                                    placement: {
+                                        from: "top",
+                                        align: "center"
+                                    },
+                                    offset: 20,
+                                    spacing: 10,
+                                    z_index: 1031,
+                                    delay: 5000,
+                                    timer: 1000,
+                                    animate: {
+                                        enter: 'animated fadeInDown',
+                                        exit: 'animated fadeOutUp'
+                                    },
+                                    icon_type: 'class'
+
+                                });
+
+                            });
+
+                        console.log("Project Deleted: " + ID);
+                    });
                 });
                 // obj.addListener('click', function(event) {
                 //     console.log(event);
