@@ -93,7 +93,42 @@ export class MainController {
                 }
             });
 
+            var layerToggle = document.getElementById("layerToggleDiv");
+            gmap.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerToggle);
 
+            //Add toggle layer functions for PDAs, COCs and TPAs
+            $('#pdaToggle').change(function() {
+                var status = ($(this).prop('checked'));
+                if (status) {
+                    console.log('add pdas');
+                    var getPDALayer = function() {
+                        var pdaLayer = new google.maps.Data();
+                        $.getJSON("/assets/js/pdas.json", function(data) {
+                            console.log(data);
+                            var geoJsonObject;
+                            geoJsonObject = topojson.feature(data, data.objects.pdas);
+                            pdaLayer.addGeoJson(geoJsonObject);
+                            pdaLayer.setStyle(function(feature) {
+
+                                return {
+                                    fillColor: 'orange',
+                                    strokeColor: 'orange',
+                                    fillOpacity: 0.2,
+                                    strokeWeight: 2
+                                };
+                            });
+
+                        });
+                        return pdaLayer;
+                    };
+
+                    this.pdaLayer = getPDALayer();
+                    this.pdaLayer.setMap(gmap);
+                } else if (!status) {
+                    console.log('remove pdas');
+                    this.pdaLayer.setMap(null);
+                }
+            });
 
 
             /**
