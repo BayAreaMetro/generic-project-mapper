@@ -35,6 +35,7 @@
         "morgan": "^1.8.0",
         "mssql": "^4.0.4",
         "passport": "~0.3.0",
+        "passport-cognito": "^0.1.9",
         "passport-local": "^1.0.0",
         "sequelize": "^3.23.6",
         "seriate": "^0.10.0",

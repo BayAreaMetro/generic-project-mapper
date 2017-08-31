@@ -798,7 +798,7 @@ export class MainController {
                         '</tr>' +
                         '<tr>' +
                         '<td>' +
-                        ' <button id="delete_Btn" type="submit" class="btn btn-danger"> <i class="fa fa-trash-o"></i></button>' +
+                        ' <button id="delete_Btn" type="submit" class="btn btn-danger"> <i class="fa fa-trash-o"></i>&nbsp;&nbsp;Delete</button>' +
                         '</td>' +
                         '</tr>' +
                         '</tbody>' +
