@@ -105,11 +105,11 @@ export class MainController {
             $('#pdaToggle').change(function() {
                 var status = ($(this).prop('checked'));
                 if (status) {
-                    console.log('add pdas');
+                    // console.log('add pdas');
                     var getPDALayer = function() {
                         var pdaLayer = new google.maps.Data();
                         $.getJSON("/assets/js/pdas.json", function(data) {
-                            console.log(data);
+                            // console.log(data);
                             var geoJsonObject;
                             geoJsonObject = topojson.feature(data, data.objects.pdas);
                             pdaLayer.addGeoJson(geoJsonObject);
@@ -119,7 +119,8 @@ export class MainController {
                                     fillColor: 'orange',
                                     strokeColor: 'orange',
                                     fillOpacity: 0.2,
-                                    strokeWeight: 2
+                                    strokeWeight: 1
+
                                 };
                             });
 
@@ -130,7 +131,78 @@ export class MainController {
                     this.pdaLayer = getPDALayer();
                     this.pdaLayer.setMap(gmap);
                 } else if (!status) {
-                    console.log('remove pdas');
+                    // console.log('remove pdas');
+                    this.pdaLayer.setMap(null);
+                }
+            });
+
+            //Add toggle layer functions for PDAs, COCs and TPAs
+            $('#tpaToggle').change(function() {
+                var status = ($(this).prop('checked'));
+                if (status) {
+                    // console.log('add pdas');
+                    var getPDALayer = function() {
+                        var pdaLayer = new google.maps.Data();
+                        $.getJSON("/assets/js/tpas.json", function(data) {
+                            // console.log(data);
+                            var geoJsonObject;
+                            geoJsonObject = topojson.feature(data, data.objects.Transit_Priority_Areas_2017);
+                            pdaLayer.addGeoJson(geoJsonObject);
+                            pdaLayer.setStyle(function(feature) {
+
+                                return {
+                                    fillColor: 'purple',
+                                    strokeColor: 'purple',
+                                    fillOpacity: 0.1,
+                                    strokeWeight: 1,
+                                    strokeOpacity: 0.6,
+
+                                };
+                            });
+
+                        });
+                        return pdaLayer;
+                    };
+
+                    this.pdaLayer = getPDALayer();
+                    this.pdaLayer.setMap(gmap);
+                } else if (!status) {
+                    // console.log('remove pdas');
+                    this.pdaLayer.setMap(null);
+                }
+            });
+
+            //Add toggle layer functions for PDAs, COCs and TPAs
+            $('#cocToggle').change(function() {
+                var status = ($(this).prop('checked'));
+                if (status) {
+                    // console.log('add pdas');
+                    var getPDALayer = function() {
+                        var pdaLayer = new google.maps.Data();
+                        $.getJSON("/assets/js/cocs.json", function(data) {
+                            // console.log(data);
+                            var geoJsonObject;
+                            geoJsonObject = topojson.feature(data, data.objects.Communities_of_Concern_2017);
+                            pdaLayer.addGeoJson(geoJsonObject);
+                            pdaLayer.setStyle(function(feature) {
+
+                                return {
+                                    fillColor: 'lightgray',
+                                    strokeColor: 'lightgray',
+                                    fillOpacity: 0.5,
+                                    strokeWeight: 1,
+                                    strokeOpacity: 0.9
+                                };
+                            });
+
+                        });
+                        return pdaLayer;
+                    };
+
+                    this.pdaLayer = getPDALayer();
+                    this.pdaLayer.setMap(gmap);
+                } else if (!status) {
+                    // console.log('remove pdas');
                     this.pdaLayer.setMap(null);
                 }
             });
@@ -197,8 +269,34 @@ export class MainController {
                             return;
                         }
                     }
-                    alert("Couldn't retrieve the city limits for a city, they are either missing from OpenStreetMap, not labeled " +
-                        "consistently or the city entered is not valid.");
+
+                    //Notification
+                    $.notify({
+                        // options
+                        icon: 'glyphicon glyphicon-warning-sign',
+                        message: "&nbsp;&nbsp;Couldn't retrieve the city limits for a city, they are either missing from OpenStreetMap, not labeled " +
+                            "consistently or the city entered is not valid. "
+
+                    }, {
+                        type: "danger",
+                        allow_dismiss: true,
+                        placement: {
+                            from: "top",
+                            align: "center"
+                        },
+                        offset: 20,
+                        spacing: 10,
+                        z_index: 1031,
+                        delay: 5000,
+                        timer: 1000,
+                        animate: {
+                            enter: 'animated fadeInDown',
+                            exit: 'animated fadeOutUp'
+                        },
+                        icon_type: 'class'
+
+                    });
+                    var faSpinner = $('#faSpinner').removeClass('fa').removeClass('fa-spinner').removeClass('fa-spin');
                     console.log("Failed to find city border from OSM.");
                 }
 
