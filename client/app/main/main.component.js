@@ -63,6 +63,8 @@ export class MainController {
             var toAddress;
             var marker1, marker2;
 
+
+
             //Create initial map object
             gmap = new google.maps.Map(document.getElementById('canvas'), {
                 center: new google.maps.LatLng(37.796966, -122.275051),
@@ -95,6 +97,9 @@ export class MainController {
 
             var layerToggle = document.getElementById("layerToggleDiv");
             gmap.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerToggle);
+
+            var citySearch = document.getElementById("citySearch_Div");
+            gmap.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(citySearch);
 
             //Add toggle layer functions for PDAs, COCs and TPAs
             $('#pdaToggle').change(function() {
@@ -130,6 +135,134 @@ export class MainController {
                 }
             });
 
+            var allOverlays = [];
+
+            //CITY LIMITS SEARCH 
+            //Based on https://github.com/pgkelley4/city-boundaries-google-maps
+            var loadCityLimits = document.getElementById('cityTextInput_Btn');
+            loadCityLimits.addEventListener('click', function() {
+                var BOUNDARY_COLORS = ['FF0000'];
+                var BOUNDARY_COLOR_COORDINATES_PARAM = 0;
+
+
+                console.log('button clicked');
+                // clear any previous polygons
+                while (allOverlays[0]) {
+                    allOverlays.pop().setMap(null);
+                }
+
+
+                var cityText = document.getElementById('cityTextInput');
+                var splitCity = cityText.value.split(",");
+                if (splitCity.length != 2) {
+                    alert("Must enter a city in the format: CITY, STATE.");
+                    return;
+                }
+
+                var city = toTitleCase(splitCity[0].trim());
+                var state = splitCity[1].trim().toUpperCase();
+
+
+                var params = [];
+                params[BOUNDARY_COLOR_COORDINATES_PARAM] = BOUNDARY_COLORS[0];
+                getRequestJSON(getOSMAreaForCityURL(city, state), processCityArea, params);
+
+                function getOSMAreaForCityURL(cityName, stateName) {
+                    return "http://overpass-api.de/api/interpreter?data=[out:json];area[name=%22" + cityName +
+                        "%22][%22is_in:state_code%22=%22" + stateName + "%22];foreach(out;);node[name=%22" + cityName +
+                        "%22][%22is_in%22~%22" + stateName + "%22];foreach(out;is_in;out;);";
+                    // case insensitive, really slow!
+                    // area[name~%22" + cityName +
+                    // "%22, i][%22is_in:state_code%22~%22" + stateName + "%22, i];foreach(out;);node[name~%22" + cityName +
+                    // "%22, i][%22is_in%22~%22" + stateName + "%22];foreach(out;is_in;out;);
+                    // could directly ping for relation
+                    //rel[name=Boston]["is_in:state_code"~MA];foreach(out;);
+                }
+
+                function processCityArea(areaJSON, params) {
+                    for (var x in areaJSON.elements) {
+                        // if find something that is level 8
+                        // if find something labelled city
+                        // if find something that has the exact name
+                        if ((areaJSON.elements[x].tags.admin_level == "8" &&
+                                areaJSON.elements[x].tags.border_type == null) ||
+                            areaJSON.elements[x].tags.border_type == "city") {
+                            var areaID = areaJSON.elements[x].id;
+                            // transform to relation id, and get relation
+                            var relationID = areaID - 3600000000;
+
+                            getRelationInOrder(relationID, constructMapFromBoundaries, params);
+                            return;
+                        }
+                    }
+                    alert("Couldn't retrieve the city limits for a city, they are either missing from OpenStreetMap, not labeled " +
+                        "consistently or the city entered is not valid.");
+                    console.log("Failed to find city border from OSM.");
+                }
+
+                function constructMapFromBoundaries(paths, params) {
+                    var color = params[BOUNDARY_COLOR_COORDINATES_PARAM];
+
+                    for (var i in paths) {
+                        var path = paths[i];
+                        for (var j in path) {
+                            var node = path[j];
+                            path[j] = new google.maps.LatLng(node.lat, node.lon);
+                        }
+                    }
+
+                    // google maps api can create multiple polygons with one create call
+                    // and returns one object. Also can handle inner ways (holes)
+                    var polygon = createPolygon(paths, color);
+
+                    // set map zoom and location to new polygons
+                    gmap.fitBounds(polygon.getBounds());
+                }
+
+
+
+                function createPolygon(paths, color) {
+                    var newPolygon = new google.maps.Polygon({
+                        paths: paths,
+                        strokeColor: "blue",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: "yellow",
+                        fillOpacity: 0.2,
+                        draggable: false
+                            // geodisc: true
+                    });
+
+                    newPolygon.setMap(gmap);
+
+                    allOverlays.push(newPolygon);
+
+                    return newPolygon;
+                }
+
+                function getOSMCityRelationURL(relationID) {
+                    return "http://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
+                }
+
+
+                function getRelationInOrder(relationID, callback, params) {
+                    params.push(callback);
+                    getRequestJSON(getOSMCityRelationURL(relationID), constructRelationInOrder, params);
+                }
+
+                /**
+                 * Get the OpenStreetMap URL for a specific relation as a String.
+                 *
+                 * @param {String} relationID ID of the relation to retrieve
+                 */
+                function getOSMRelationURL(relationID) {
+                    return "http://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
+                }
+
+
+
+            });
+            //END CITY LIMITS SEARCH
 
             /**
              * GOOGLE MAPS DIRECTIONS
