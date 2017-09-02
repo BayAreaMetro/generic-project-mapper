@@ -597,6 +597,7 @@ export class MainController {
                 this.selectedWkt = wkt.toString();
                 console.log(this.selectedWkt);
 
+
                 var latLngs;
                 var latLngString;
                 var i;
@@ -623,6 +624,10 @@ export class MainController {
 
                 } else if (this.shape === 'Line') {
                     latLngs = this.selectedWkt.slice(10);
+                    console.log(latLngs);
+                    latLngs = latLngs.substring(1);
+                    latLngs = latLngs.substring(0, latLngs.length - 1);
+                    console.log(latLngs);
                     gmap.multiPartFeatures.push(latLngs);
                     latLngString = '';
                     for (i = 0; i < gmap.multiPartFeatures.length; i++) {
@@ -638,6 +643,9 @@ export class MainController {
                     }
                 } else if (this.shape === 'Polygon') {
                     latLngs = this.selectedWkt.slice(7);
+                    // latLngs = latLngs.substring(1);
+                    // latLngs = latLngs.substring(0, latLngs.length - 1);
+                    console.log(latLngs);
                     gmap.multiPartFeatures.push(latLngs);
                     latLngString = '';
                     for (i = 0; i < gmap.multiPartFeatures.length; i++) {
@@ -696,7 +704,7 @@ export class MainController {
                     }
                 }
             }
-
+            console.log(object.ID);
             obj = wkt.toObject(gmap.defaults); // Make an object
 
 
@@ -726,7 +734,7 @@ export class MainController {
                         obj[i].setMap(gmap);
                         obj[i].Project = object.Project;
                         obj[i].ID = object.ID;
-
+                        var ID = object.ID;
                         google.maps.event.addListener(obj[i], 'click', function(event) {
                             if (gmap.infowindow) {
                                 gmap.infowindow.close();
@@ -747,7 +755,7 @@ export class MainController {
                                 '</tr>' +
                                 '<tr>' +
                                 '<td>' +
-                                ' <button type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i>&nbsp;&nbsp;Delete</button>' +
+                                ' <button id="delete_Btn" type="submit" class="btn btn-danger" ng-click="console.log(\'clicked\')"> <i class="fa fa-trash-o"></i>&nbsp;&nbsp;Delete</button>' +
                                 '</td>' +
                                 '</tr>' +
                                 '</tbody>' +
@@ -762,6 +770,70 @@ export class MainController {
                             gmap.infowindow.setPosition(position);
                             gmap.infowindow.setContent(contentString);
                             gmap.infowindow.open(gmap);
+
+                            document.getElementById("delete_Btn").addEventListener("click", function() {
+                                $http.delete('/api/projects/' + ID)
+                                    .then(response => {
+                                        console.log(response);
+                                        //Notification
+                                        $.notify({
+                                            // options
+                                            icon: 'glyphicon glyphicon-warning-sign',
+                                            message: '&nbsp;&nbsp;Project Deleted from Database! '
+
+                                        }, {
+                                            type: "danger",
+                                            allow_dismiss: true,
+                                            placement: {
+                                                from: "top",
+                                                align: "center"
+                                            },
+                                            offset: 20,
+                                            spacing: 10,
+                                            z_index: 1031,
+                                            delay: 5000,
+                                            timer: 1000,
+                                            animate: {
+                                                enter: 'animated fadeInDown',
+                                                exit: 'animated fadeOutUp'
+                                            },
+                                            icon_type: 'class'
+
+                                        });
+                                        $state.reload();
+                                    })
+                                    .catch(err => {
+                                        console.log(err);
+                                        //Notification
+                                        $.notify({
+                                            // options
+                                            icon: 'glyphicon glyphicon-warning-sign',
+                                            message: '&nbsp;&nbsp;An error occurred trying to delete this project! '
+
+                                        }, {
+                                            type: "danger",
+                                            allow_dismiss: true,
+                                            placement: {
+                                                from: "top",
+                                                align: "center"
+                                            },
+                                            offset: 20,
+                                            spacing: 10,
+                                            z_index: 1031,
+                                            delay: 5000,
+                                            timer: 1000,
+                                            animate: {
+                                                enter: 'animated fadeInDown',
+                                                exit: 'animated fadeOutUp'
+                                            },
+                                            icon_type: 'class'
+
+                                        });
+
+                                    });
+
+                                console.log("Project Deleted: " + ID);
+                            });
                         });
                         gmap.features.push(obj[i]);
 
@@ -945,6 +1017,7 @@ export class MainController {
             Id: this.project.Id
         };
         console.log(mapInfo);
+        console.log(this.editType);
 
         if (!this.project.Id || !this.project.name || !this.editType) {
             //Notification
@@ -977,7 +1050,7 @@ export class MainController {
         //Add to multi-part if necessary
         if (this.editType === 'multiPoint') {
 
-            latLngString = '';
+            var latLngString = '';
             for (var i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
             }
@@ -989,7 +1062,7 @@ export class MainController {
 
 
         } else if (this.editType === 'multiLine') {
-            latLngString = '';
+            var latLngString = '';
             for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
                 latLngString = latLngString + '(' + this.gmap.multiPartFeatures[i] + '),';
             }
@@ -1000,20 +1073,24 @@ export class MainController {
             mapInfo.wkt = multiPartWkt;
             postProject(mapInfo, this.$http, this.gmap, this.$state);
 
-        } else if (this.editType === 'multiPolygon') {
-            latlngString = '';
+        } else if (this.editType === 'multiPoly') {
+            var latLngString = '';
+            console.log(latLngString);
+            console.log(this.gmap.multiPartFeatures);
             for (i = 0; i < this.gmap.multiPartFeatures.length; i++) {
-                latLngString = latLngString + this.gmap.multiPartFeatures[i] + ',';
+                latLngString += this.gmap.multiPartFeatures[i] + ',';
+                console.log(latLngString);
             }
             latLngString = latLngString.slice(0, -1);
 
             multiPartWkt = 'MULTIPOLYGON (' + latLngString + ')';
+            console.log(multiPartWkt);
             mapInfo.wkt = multiPartWkt;
             postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singlePoint') {
             console.log(this.gmap.multiPartFeatures[0]);
-            var latlngString = '';
+            var latLngString = '';
             latLngString = this.gmap.multiPartFeatures[0];
             console.log(latLngString);
             multiPartWkt = 'POINT (' + latLngString + ')';
@@ -1021,16 +1098,18 @@ export class MainController {
             postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singleLine') {
-            var latlngString = '';
+            // var latlngString = '';
             latLngString = this.gmap.multiPartFeatures[0];
             multiPartWkt = 'LINESTRING (' + latLngString + ')';
+            console.log(multiPartWkt);
             mapInfo.wkt = multiPartWkt;
             postProject(mapInfo, this.$http, this.gmap, this.$state);
 
         } else if (this.editType === 'singlePoly') {
-            var latlngString = '';
+            // var latLngString = '';
             latLngString = this.gmap.multiPartFeatures[0];
-            multiPartWkt = 'POLYGON (' + latLngString + ')';
+            multiPartWkt = 'POLYGON ' + latLngString;
+            console.log(multiPartWkt);
             mapInfo.wkt = multiPartWkt;
             postProject(mapInfo, this.$http, this.gmap, this.$state);
 
