@@ -141,6 +141,8 @@ export class MainController {
             //Based on https://github.com/pgkelley4/city-boundaries-google-maps
             var loadCityLimits = document.getElementById('cityTextInput_Btn');
             loadCityLimits.addEventListener('click', function() {
+                var faSpinner = $('#faSpinner').addClass('fa').addClass('fa-spinner').addClass('fa-spin');
+
                 var BOUNDARY_COLORS = ['FF0000'];
                 var BOUNDARY_COLOR_COORDINATES_PARAM = 0;
 
@@ -217,6 +219,7 @@ export class MainController {
 
                     // set map zoom and location to new polygons
                     gmap.fitBounds(polygon.getBounds());
+                    var faSpinner = $('#faSpinner').removeClass('fa').removeClass('fa-spinner').removeClass('fa-spin');
                 }
 
 
