@@ -143,10 +143,10 @@ export class MainController {
                     // console.log('add pdas');
                     var getPDALayer = function() {
                         var pdaLayer = new google.maps.Data();
-                        $.getJSON("/assets/js/tpas.json", function(data) {
+                        $.getJSON("/assets/js/tpas_dissolved.json", function(data) {
                             // console.log(data);
                             var geoJsonObject;
-                            geoJsonObject = topojson.feature(data, data.objects.Transit_Priority_Areas_2017);
+                            geoJsonObject = topojson.feature(data, data.objects.tpas_dissolved);
                             pdaLayer.addGeoJson(geoJsonObject);
                             pdaLayer.setStyle(function(feature) {
 
@@ -179,10 +179,10 @@ export class MainController {
                     // console.log('add pdas');
                     var getPDALayer = function() {
                         var pdaLayer = new google.maps.Data();
-                        $.getJSON("/assets/js/cocs.json", function(data) {
+                        $.getJSON("/assets/js/cocs_dissolved.json", function(data) {
                             // console.log(data);
                             var geoJsonObject;
-                            geoJsonObject = topojson.feature(data, data.objects.Communities_of_Concern_2017);
+                            geoJsonObject = topojson.feature(data, data.objects.cocs_dissolved);
                             pdaLayer.addGeoJson(geoJsonObject);
                             pdaLayer.setStyle(function(feature) {
 
