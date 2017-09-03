@@ -101,7 +101,7 @@ export class MainController {
             var citySearch = document.getElementById("citySearch_Div");
             gmap.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(citySearch);
 
-            //Add toggle layer functions for PDAs, COCs and TPAs
+            //Add toggle layer functions for PDAs
             $('#pdaToggle').change(function() {
                 var status = ($(this).prop('checked'));
                 if (status) {
@@ -136,7 +136,7 @@ export class MainController {
                 }
             });
 
-            //Add toggle layer functions for PDAs, COCs and TPAs
+            //Add toggle layer functions for TPAs
             $('#tpaToggle').change(function() {
                 var status = ($(this).prop('checked'));
                 if (status) {
@@ -172,7 +172,7 @@ export class MainController {
                 }
             });
 
-            //Add toggle layer functions for PDAs, COCs and TPAs
+            //Add toggle layer functions for COCs
             $('#cocToggle').change(function() {
                 var status = ($(this).prop('checked'));
                 if (status) {
@@ -187,9 +187,44 @@ export class MainController {
                             pdaLayer.setStyle(function(feature) {
 
                                 return {
-                                    fillColor: 'lightgray',
-                                    strokeColor: 'lightgray',
-                                    fillOpacity: 0.5,
+                                    fillColor: 'pink',
+                                    strokeColor: 'pink',
+                                    fillOpacity: 0.2,
+                                    strokeWeight: 1,
+                                    strokeOpacity: 0.9
+                                };
+                            });
+
+                        });
+                        return pdaLayer;
+                    };
+
+                    this.pdaLayer = getPDALayer();
+                    this.pdaLayer.setMap(gmap);
+                } else if (!status) {
+                    // console.log('remove pdas');
+                    this.pdaLayer.setMap(null);
+                }
+            });
+
+            //Add toggle layer functions for COCs
+            $('#cityToggle').change(function() {
+                var status = ($(this).prop('checked'));
+                if (status) {
+                    // console.log('add pdas');
+                    var getPDALayer = function() {
+                        var pdaLayer = new google.maps.Data();
+                        $.getJSON("/assets/js/Places2.json", function(data) {
+                            // console.log(data);
+                            var geoJsonObject;
+                            geoJsonObject = topojson.feature(data, data.objects.Places2);
+                            pdaLayer.addGeoJson(geoJsonObject);
+                            pdaLayer.setStyle(function(feature) {
+
+                                return {
+                                    fillColor: 'gray',
+                                    strokeColor: 'gray',
+                                    fillOpacity: 0.2,
                                     strokeWeight: 1,
                                     strokeOpacity: 0.9
                                 };
