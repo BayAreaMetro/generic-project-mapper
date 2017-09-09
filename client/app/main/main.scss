@@ -304,3 +304,7 @@ select.custom::-ms-expand {
     background: inherit;
     left: 20px;
 }
+
+.loading {
+    background: #333 url('/assets/js/loading.gif') no-repeat 50% 50%;
+}

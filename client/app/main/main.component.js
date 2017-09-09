@@ -103,6 +103,7 @@ export class MainController {
 
             //Add toggle layer functions for PDAs
             $('#pdaToggle').change(function() {
+                $('#pdaSpinner').addClass('fa-spinner fa-spin');
                 var status = ($(this).prop('checked'));
                 if (status) {
                     // console.log('add pdas');
@@ -125,6 +126,7 @@ export class MainController {
                             });
 
                         });
+                        $('#pdaSpinner').removeClass('fa-spinner fa-spin');
                         return pdaLayer;
                     };
 
@@ -133,11 +135,13 @@ export class MainController {
                 } else if (!status) {
                     // console.log('remove pdas');
                     this.pdaLayer.setMap(null);
+                    $('#pdaSpinner').removeClass('fa-spinner fa-spin');
                 }
             });
 
             //Add toggle layer functions for TPAs
             $('#tpaToggle').change(function() {
+                $('#tpaSpinner').addClass('fa-spinner fa-spin');
                 var status = ($(this).prop('checked'));
                 if (status) {
                     // console.log('add pdas');
@@ -161,6 +165,7 @@ export class MainController {
                             });
 
                         });
+                        $('#tpaSpinner').removeClass('fa-spinner fa-spin');
                         return pdaLayer;
                     };
 
@@ -169,11 +174,13 @@ export class MainController {
                 } else if (!status) {
                     // console.log('remove pdas');
                     this.pdaLayer.setMap(null);
+                    $('#tpaSpinner').removeClass('fa-spinner fa-spin');
                 }
             });
 
             //Add toggle layer functions for COCs
             $('#cocToggle').change(function() {
+                $('#cocSpinner').addClass('fa-spinner fa-spin');
                 var status = ($(this).prop('checked'));
                 if (status) {
                     // console.log('add pdas');
@@ -196,19 +203,23 @@ export class MainController {
                             });
 
                         });
+                        $('#cocSpinner').removeClass('fa-spinner fa-spin');
                         return pdaLayer;
                     };
 
                     this.pdaLayer = getPDALayer();
                     this.pdaLayer.setMap(gmap);
+                    // $('#cocSpinner').removeClass('fa-spinner fa-spin');
                 } else if (!status) {
                     // console.log('remove pdas');
                     this.pdaLayer.setMap(null);
+                    $('#cocSpinner').removeClass('fa-spinner fa-spin');
                 }
             });
 
             //Add toggle layer functions for COCs
             $('#cityToggle').change(function() {
+                $('#citySpinner').addClass('fa-spinner fa-spin');
                 var status = ($(this).prop('checked'));
                 if (status) {
                     // console.log('add pdas');
@@ -231,6 +242,7 @@ export class MainController {
                             });
 
                         });
+                        $('#citySpinner').removeClass('fa-spinner fa-spin');
                         return pdaLayer;
                     };
 
@@ -239,6 +251,7 @@ export class MainController {
                 } else if (!status) {
                     // console.log('remove pdas');
                     this.pdaLayer.setMap(null);
+                    $('#citySpinner').removeClass('fa-spinner fa-spin');
                 }
             });
 
