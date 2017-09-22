@@ -255,6 +255,42 @@ export class MainController {
                 }
             });
 
+             //Add toggle layer functions for federal aid roads
+            $('#fedAidToggle').change(function() {
+                // $('#citySpinner').addClass('fa-spinner fa-spin');
+                var status = ($(this).prop('checked'));
+                if (status) {
+                    // console.log('add fedaidroads');
+                    var getFedAidLayer = function() {
+                        var fedAidLayer = new google.maps.Data();
+                        $.getJSON("/assets/js/HPMS_FedAidRoads_BayArea_2014_Dissolve.json", function(data) {
+                            console.log(data);
+                            var geoJsonObject;
+                            geoJsonObject = topojson.feature(data, data.objects.HPMS_FedAidRoads_BayArea_2014_Dissolve);
+                            fedAidLayer.addGeoJson(geoJsonObject);
+                            fedAidLayer.setStyle(function(feature) {
+
+                                return {
+                                    strokeColor: 'purple',
+                                    strokeWeight: 3,
+                                    strokeOpacity: 0.9
+                                };
+                            });
+
+                        });
+                        // $('#citySpinner').removeClass('fa-spinner fa-spin');
+                        return fedAidLayer;
+                    };
+
+                    this.fedAidLayer = getFedAidLayer();
+                    this.fedAidLayer.setMap(gmap);
+                } else if (!status) {
+                    // console.log('remove fedaidroads');
+                    this.fedAidLayer.setMap(null);
+                    $('#citySpinner').removeClass('fa-spinner fa-spin');
+                }
+            });
+
             var allOverlays = [];
 
             //CITY LIMITS SEARCH 
@@ -986,7 +1022,7 @@ export class MainController {
                     }
                 }
             }
-            console.log(object.ID);
+            // console.log(object.ID);
             obj = wkt.toObject(gmap.defaults); // Make an object
 
 
