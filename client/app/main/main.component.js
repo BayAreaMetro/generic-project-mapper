@@ -255,7 +255,7 @@ export class MainController {
                 }
             });
 
-             //Add toggle layer functions for federal aid roads
+            //Add toggle layer functions for federal aid roads
             $('#fedAidToggle').change(function() {
                 // $('#citySpinner').addClass('fa-spinner fa-spin');
                 var status = ($(this).prop('checked'));
@@ -766,6 +766,7 @@ export class MainController {
                 var removeLast = $('#removeLastFeature_Btn');
                 saveAndContinue_Btn.removeClass('hidden');
                 removeLast.removeClass('hidden');
+                var routeFeatureWkt, shape, idPrefix;
 
                 directionsService.route({
                     origin: gmap.fromAddress,
@@ -837,12 +838,12 @@ export class MainController {
                         // this.$apply();
 
                         //Set update parameters
-                        this.routeFeatureWkt = networkString;
+                        routeFeatureWkt = networkString;
                         if (gmap.multiPartFeatures.length > 1) {
-                            this.routeFeatureWkt = multiPartWkt;
+                            routeFeatureWkt = multiPartWkt;
                         }
-                        this.idPrefix = 'LN-';
-                        this.shape = 'Line';
+                        idPrefix = 'LN-';
+                        shape = 'Line';
 
                         gmap.editedRoute = true;
 
@@ -1849,6 +1850,7 @@ export class MainController {
         console.log(toAddress);
         var gmap = this.gmap;
         var multiPartWkt;
+        var routeFeatureWkt, idPrefix, shape;
 
         var saveAndContinue_Btn = $('#saveAndContinue_Btn');
         var removeLast = $('#removeLastFeature_Btn');
@@ -1925,12 +1927,12 @@ export class MainController {
                 // this.$apply();
 
                 //Set update parameters
-                this.routeFeatureWkt = networkString;
+                routeFeatureWkt = networkString;
                 if (gmap.multiPartFeatures.length > 1) {
-                    this.routeFeatureWkt = multiPartWkt;
+                    routeFeatureWkt = multiPartWkt;
                 }
-                this.idPrefix = 'LN-';
-                this.shape = 'Line';
+                idPrefix = 'LN-';
+                shape = 'Line';
 
                 gmap.editedRoute = true;
                 console.log(gmap.editedRoute, ' the edited route');

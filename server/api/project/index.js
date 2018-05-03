@@ -6,7 +6,7 @@ var controller = require('./project.controller');
 var router = express.Router();
 
 router.get('/', controller.index);
-router.get('/:id', controller.show);
+router.get('/', controller.show);
 router.post('/map', controller.addMap);
 router.post('/', controller.create);
 
