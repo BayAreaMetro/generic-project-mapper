@@ -35,7 +35,20 @@ It may be neccessary to truncate existing features stored in the master table wh
 truncate table rpd.MapApplicatonData
 ```
 ## Step 2. Map Projects
-Directions on how to map projects are forthcoming...
+Before mapping any projects lets familiarize ourselves with the inputs required to complete the project mapper process.
+
+Project Name: Choose a category from the drop down list (this can be changed later) .
+Project ID: Either click generate to create a universally unique identifier or type your own .
+Mapping Info: Choose from the drop-down menu to type of geography to represent your project
+From [Enter a location]: First, click the green pin button then navigate to where your project will begin. Be sure to zoom-in as close as possible. Second, click the point on the map to associate the green pin with your map location point.
+
+To [Enter a location]: First, click the green pin button then navigate to where your project will begin. Be sure to zoom-in as close as possible. Second, click the point on the map to associate the green pin with your map location point.
+
+Calculate Route: Click but then adjust the A and B locational pins to more accurately match your original From/To locations 
+
+Save/Add Next: Click
+
+Submit: Click
 
 ### WKT String to Shape Geometry
 When creating features using the Project Mapper tool, the features are stored in `Well Known Text (WKT) format`.  In order to view these features in ArcGIS mapping software (ArcMap, ArcPro, ArcGIS Online) you will need to convert the WKT string into geometry.  Within the Sql Server Database, this is accomplished using the STGeomFromText converter.  See below for an example of how this is accomplished.  
