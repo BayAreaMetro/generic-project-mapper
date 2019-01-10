@@ -39,7 +39,10 @@ Directions on how to map projects are forthcoming...
 ### How to turn WKT String to Shape Geometry
 
 ```
-update rpd.MapApplicatonData
-set Shape = geometry::STGeomFromText(WKT,4326)
+  update rpd.MapApplicatonData
+  set 
+  Shape = geometry::STGeomFromText(WKT,4326),
+  Project = 'Express Lanes'
+  Where Shape is null
 ```
 
