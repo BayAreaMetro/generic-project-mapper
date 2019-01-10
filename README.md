@@ -26,9 +26,10 @@ Run `gulp build` for building and `gulp serve` for preview.
 Running `npm test` will run the unit tests with karma.
 
 # Using the Application
-The data for this application is stored in WebGIS on GISDB2 under the RPD Schema in the table rpd.MapApplicatonData
+The data for this application is stored in `WebGIS on GISDB2` under the RPD Schema in the table `rpd.MapApplicatonData`
 
-## Step 1. Truncate Existing Features from Master Table When starting a new project.
+## Step 1. Check contents of Mapping Table
+It may be neccessary to truncate existing features stored in the master table when starting a new mapping project.  To do this, use the command below.
 
 ```
 truncate table rpd.MapApplicatonData
@@ -36,7 +37,8 @@ truncate table rpd.MapApplicatonData
 ## Step 2. Map Projects
 Directions on how to map projects are forthcoming...
 
-### How to turn WKT String to Shape Geometry
+### WKT String to Shape Geometry
+When creating features using the Project Mapper tool, the features are stored in `Well Known Text (WKT) format`.  In order to view these features in ArcGIS mapping software (ArcMap, ArcPro, ArcGIS Online) you will need to convert the WKT string into geometry.  Within the Sql Server Database, this is accomplished using the STGeomFromText converter.  See below for an example of how this is accomplished.  
 
 ```
   update rpd.MapApplicatonData
@@ -45,4 +47,6 @@ Directions on how to map projects are forthcoming...
   Project = 'Express Lanes'
   Where Shape is null
 ```
+
+Additionally, you will notice that we have set the `Project Column` in the table to the name of the projects that you are mapping.  In this case we are mapping Express Lane projects, there for we have set the value of the Project for each feature mapped to 'Express Lanes'.
 
