@@ -25,11 +25,21 @@ Run `gulp build` for building and `gulp serve` for preview.
 
 Running `npm test` will run the unit tests with karma.
 
-### Using the Application
+# Using the Application
+The data for this application is stored in WebGIS on GISDB2 under the RPD Schema in the table rpd.MapApplicatonData
 
-#### How to turn WKT String to Shape Geometry
+## Step 1. Truncate Existing Features from Master Table When starting a new project.
+
+```
+truncate table rpd.MapApplicatonData
+```
+## Step 2. Map Projects
+Directions on how to map projects are forthcoming...
+
+### How to turn WKT String to Shape Geometry
 
 ```
 update rpd.MapApplicatonData
 set Shape = geometry::STGeomFromText(WKT,0)
 ```
+
