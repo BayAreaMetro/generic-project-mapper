@@ -40,6 +40,7 @@ Before mapping any projects lets familiarize ourselves with the inputs required 
 Project Name: Choose a category from the drop down list (this can be changed later).  
 Project ID: Either click generate to create a universally unique identifier or type your own.  
 Mapping Info: Choose from the drop-down menu to type of geography to represent your project.  
+
 From [Enter a location]: First, click the green pin button then navigate to where your project will begin. Be sure to zoom-in as close as possible. Second, click the point on the map to associate the green pin with your map location point.
 
 To [Enter a location]: First, click the green pin button then navigate to where your project will begin. Be sure to zoom-in as close as possible. Second, click the point on the map to associate the green pin with your map location point.
