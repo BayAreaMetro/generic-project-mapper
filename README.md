@@ -29,5 +29,5 @@ Running `npm test` will run the unit tests with karma.
 
 #### How to turn WKT String to Shape Geometry
 
-`update rpd.MapApplicatonData. 
-set Shape = geometry::STGeomFromText(WKT,0)`. 
+```update rpd.MapApplicatonData  
+set Shape = geometry::STGeomFromText(WKT,0)```
