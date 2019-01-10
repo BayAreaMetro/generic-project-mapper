@@ -40,6 +40,6 @@ Directions on how to map projects are forthcoming...
 
 ```
 update rpd.MapApplicatonData
-set Shape = geometry::STGeomFromText(WKT,0)
+set Shape = geometry::STGeomFromText(WKT,4326)
 ```
 
