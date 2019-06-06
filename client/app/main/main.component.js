@@ -519,6 +519,9 @@ export class MainController {
                     // console.log(gmap.multiPartFeatures.length);
                     console.log('added value from edit route event');
 
+                    console.log('the encoded path');
+                    console.log(result.routes[0].overview_polyline);
+
                     var decodedPath = google.maps.geometry.encoding.decodePath(result.routes[0].overview_polyline);
                     // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
                     // var newNetworkLine;
@@ -791,6 +794,8 @@ export class MainController {
 
                         console.log('changed');
 
+                        console.log('the encoded path');
+                        console.log(response.routes[0].overview_polyline);
 
                         var decodedPath = google.maps.geometry.encoding.decodePath(response.routes[0].overview_polyline);
                         // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
@@ -1689,6 +1694,10 @@ export class MainController {
                 // console.log(gmap.multiPartFeatures.length);
                 console.log('added value from edit route event');
 
+                console.log('the encoded path');
+                console.log(result.routes[0].overview_polyline);
+
+
                 var decodedPath = google.maps.geometry.encoding.decodePath(result.routes[0].overview_polyline);
                 // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
                 // var newNetworkLine;
@@ -1880,6 +1889,8 @@ export class MainController {
 
                 console.log('changed');
 
+                console.log('the encoded path');
+                console.log(response.routes[0].overview_polyline);
 
                 var decodedPath = google.maps.geometry.encoding.decodePath(response.routes[0].overview_polyline);
                 // var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
