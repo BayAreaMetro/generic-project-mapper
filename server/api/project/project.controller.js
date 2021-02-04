@@ -88,7 +88,7 @@ function handleError(res, statusCode) {
 
 // Gets a list of Projects
 export function index(req, res) {
-    var request = "select * FROM [WebGIS].[rpd].[MapApplicatonData] Where Project = 'Performance'";
+    var request = "select * FROM [WebGIS].[rpd].[MapApplicatonData] Where Project = 'OBAG'";
     console.log(request);
     sql.getPlainContext()
         .step("data", {
